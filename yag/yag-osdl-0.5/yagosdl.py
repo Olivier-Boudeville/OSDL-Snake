@@ -188,16 +188,16 @@ def initTokenDic() :
 	else:
 		tokenDic[ 'YAG-OSDL-TOKEN-CONTACT' ] = '(no mail address was specified)'
 	
-	license_file = mainDic[ 'gallery_licence_file' ]
+	license_file = mainDic[ 'gallery_license_file' ]
 	if license_file :
 		if os.path.isfile( license_file ) :
-			outputDevice.debug( 'Gallery licence file found (<%s>).' % ( license_file, ) )
+			outputDevice.debug( 'Gallery license file found (<%s>).' % ( license_file, ) )
 			tokenDic[ 'YAG-OSDL-GALLERY-LICENSE' ] = '<br><h2>Gallery license</h2><p>' + file( license_file, 'r' ).read() + '</p>'
 		else:
 			outputDevice.debug( 'Gallery license file not found (<%s>).' % ( license_file, ) )
 			
 	else:
-		outputDevice.debug( 'No gallery licence file specified.' )			
+		outputDevice.debug( 'No gallery license file specified.' )			
 	
 	info_file = mainDic[ 'gallery_info_file' ]
 	if info_file :
@@ -911,7 +911,7 @@ def main( contentDir = None, configFilename = None ) :
 		'dash_is_space_in_menu' : 'False',
 		'author'	            : 'Author not specified', 
 		'author_mail'           : 'Author mail not specified',
-		'gallery_licence_file'  : None,
+		'gallery_license_file'  : None,
 		'gallery_info_file'     : None,
 		'themes'                : NodeTheme( "RootTheme" )		
 	}
@@ -934,7 +934,7 @@ def main( contentDir = None, configFilename = None ) :
 	
 	resource_directory = checkDirectory( mainDic[ 'resource_directory' ] )
 
-	theme_directory   = checkDirectory( os.path.join( resource_directory, 'Themes', mainDic[ 'theme' ] ) )
+	theme_directory        = checkDirectory( os.path.join( resource_directory, 'Themes', mainDic[ 'theme' ] ) )
 	image_directory        = checkDirectory( os.path.join( theme_directory, 'Images' ) )
 	template_directory     = checkDirectory( os.path.join( theme_directory, 'Templates' ) )
 	helper_files_directory = checkDirectory( os.path.join( theme_directory, 'HelperFiles' ) )
