@@ -1,0 +1,25 @@
+[Options]
+
+# This must be a valid filename (no white-space, no special character)
+project_name          = OSDL-data
+
+content_directory     = /home/sye/Projects/OSDL-data/exported-data/snapshots
+resource_directory    = /home/sye/Projects/Tools/yag/yag-osdl-0.5/Resources
+
+output_in_content     = True
+output_directory      = /home/sye/Projects/Tools/yag/yag-osdl-0.5/output
+
+theme                 = OSDL-theme
+
+thumbsize             = 120
+images_by_row         = 4
+images_by_column      = 4
+dash_is_space_in_menu = True
+
+author                = Olivier Boudeville
+author_mail           = olivier.boudeville@online.fr
+
+
+gallery_license_file  = gallery-license.txt
+gallery_info_file     = gallery-info.txt
+

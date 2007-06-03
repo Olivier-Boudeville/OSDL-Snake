@@ -1,0 +1,12 @@
+Release 0.4+:
+Change #!/usr/bin/python in #!/usr/bin/env python
+Release 0.4:
+Initial release
+
+
+Taken from YAG from Stas Z (linuxisbeter@yahoo.com) [GPL-2]
+(homepage : http://home.planet.nl/~stas.linux/python/yag/).
+
+Improved and used for the OSDL project (http://osdl.sourceforge.net) by Olivier Boudeville (olivier.boudeville@online.fr)
+
+
