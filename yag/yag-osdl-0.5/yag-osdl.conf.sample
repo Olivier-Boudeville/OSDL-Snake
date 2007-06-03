@@ -3,6 +3,8 @@
 # This must be a valid filename (no white-space, no special character)
 project_name          = OSDL-data
 
+# One may prefer absolute paths for simpler management.
+
 content_directory     = /home/sye/Projects/OSDL-data/exported-data/snapshots
 resource_directory    = /home/sye/Projects/Tools/yag/yag-osdl-0.5/Resources
 
@@ -17,7 +19,7 @@ images_by_column      = 4
 dash_is_space_in_menu = True
 
 author                = Olivier Boudeville
-author_mail           = olivier.boudeville@online.fr
+author_mail           = olivier.boudeville@esperide.com
 
 
 gallery_license_file  = gallery-license.txt
