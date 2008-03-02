@@ -10,15 +10,15 @@ fi
 
 DEBUG()
 # Displays a debug message if debug mode is activated (do_debug=true).
-# Usage : DEBUG "message 1" "message 2" ...
+# Usage: DEBUG "message 1" "message 2" ...
 {
-	[ $do_debug -eq 1 ] || echo "Debug : $*"
+	[ $do_debug -eq 1 ] || echo "Debug: $*"
 }
 
 
 USAGE="
 
-	Usage : `basename $0` [--debug] [flags to pass to ${YAG_OSDL_EXEC}]
+	Usage: `basename $0` [--debug] [flags to pass to ${YAG_OSDL_EXEC}]
 	
 	This script manages everything so that yag-osdl is successfully run, or informs in case of errors."
 
@@ -40,13 +40,17 @@ PIL_MODULE="Image.py"
 
 
 if [ ! -x "${YAG_OSDL_EXEC}" ] ; then
-	echo "Error, no executable yag-osdl script available (no executable <${YAG_OSDL_EXEC}> found). $USAGE"
+	echo "
+	Error, no executable yag-osdl script available (no executable <${YAG_OSDL_EXEC}> found).
+	$USAGE"
 	exit 4
 fi	
 
 if [ ! -f "${PIL_ROOT}/${PIL_MODULE}" ] ; then
-	# With gentoo : emerge imaging
-	echo "Error, no PIL module available (no <${PIL_ROOT}/${PIL_MODULE}> file found). $USAGE"
+	# With gentoo: emerge imaging
+	echo "
+	Error, no PIL module available (no <${PIL_ROOT}/${PIL_MODULE}> file found).
+	$USAGE"
 	exit 8
 fi
 
