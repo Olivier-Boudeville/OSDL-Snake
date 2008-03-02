@@ -34,7 +34,7 @@ GUIDE="\n\tThis script will recursively scan from directory tree <$rootDir> and,
 echo -e $GUIDE
 
 echo "First commenting galleries"
-find $rootDir -type d -a ! -name 'yag-osdl-resources' -exec ${HANDLE_GALLERY} '{}' ';'
+find $rootDir -type d -a ! -name 'yag-osdl-resources' -exec ${HANDLE_GALLERY} '{}' 2>/dev/null ';'
 
 echo "Second commenting images"
 find $rootDir \( -name '*.jpeg' -o -name '*.jpg' -o -name '*.png' \) -a ! -name '*-thumbnail.jpeg'  -exec ${HANDLE_IMAGE} '{}' ';'
