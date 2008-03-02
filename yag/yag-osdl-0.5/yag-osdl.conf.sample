@@ -6,10 +6,10 @@ project_name          = OSDL-data
 # One may prefer absolute paths for simpler management.
 
 content_directory     = /home/sye/Projects/OSDL-data/exported-data/snapshots
-resource_directory    = /home/sye/Projects/Tools/yag/yag-osdl-0.5/Resources
+resource_directory    = /home/sye/Projects/Tools/yag/yag-osdl-0.6/Resources
 
 output_in_content     = True
-output_directory      = /home/sye/Projects/Tools/yag/yag-osdl-0.5/output
+output_directory      = /home/sye/Projects/Tools/yag/yag-osdl-0.6/output
 
 theme                 = OSDL-theme
 
