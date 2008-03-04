@@ -22,5 +22,5 @@ bz2:
 info:
 	@echo "PROJECT_NAME = $(PROJECT_NAME)"
 	@echo "ARCHIVE_FILE = $(ARCHIVE_FILE)"	
-	@cd .. && echo "FILES        = $(FILES)"
+	@cd .. && echo "FILES       = $(FILES)"
 	@cd .. && echo "DIRS        = $(DIRS)"
