@@ -123,7 +123,10 @@ class NodeTheme( dataUtils.Node ):
 		
 			
 	def generateHTMLReferencedContent( self ):
-		"""Returns the HTML code corresponding to the referenced content belonging to this theme."""
+		"""
+		Returns the HTML code corresponding to the referenced content belonging
+		to this theme.
+		"""
 		
 		res = "<p>"
 		if len( self.referencedContent ):
@@ -442,7 +445,8 @@ def generateThemeMainPage():
 	
 def	generateFirstThemeMenu():
 	"""
-	Generates alternate first menu, which displays theme map instead of first gallery comment.
+	Generates alternate first menu, which displays theme map instead of 
+	first gallery comment.
 	"""
 	first_original_menu = os.path.join( mainDic[ 'content_directory' ], os.path.basename( mainDic[ 'content_directory' ] ) + 'Menu.html' )
 	
@@ -944,7 +948,7 @@ def main( contentDir = None, configFilename = None ):
 		'dash_is_space_in_menu': 'False',
 		'author'	           : 'Author not specified', 
 		'author_mail'          : 'Author mail not specified',
-		'gallery_licence_file' : None,
+		'gallery_license_file' : None,
 		'gallery_info_file'    : None,
 		'themes'               : NodeTheme( "RootTheme" )		
 	}
