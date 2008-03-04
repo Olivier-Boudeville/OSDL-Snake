@@ -5,12 +5,15 @@
 #	- a not too ancient python interpreter
 #	- Ceylan generic python scripts
 #	- Python Imaging Library (PIL)
-#
+
 
 SCRIPT_NAME=yag-osdl-environment.sh
 HELPER_SCRIPT=yag-osdl-debug-helper.py
 
-IMAGING_VERSION=1.1.4
+
+# Change this setting according to the python version (in /usr/lib/python*):
+PYTHON_VERSION=2.5
+
 
 echo  "
 Initializing shell environnment for yag-osdl."
@@ -39,15 +42,16 @@ fi
 
 # Second: check for the Python Imaging Library (PIL)
 
-PIL_INFOS="yag-osdl needs the Python Imaging Library (PIL) for its image handling features. It can be downloaded from: http://www.pythonware.com/products/pil/. Once available, either update PIL_ROOT in this script, or put it in your shell environment (for instance, export PIL_ROOT=<where it is installed>, such as export PIL_ROOT=/usr/lib/python2.3/site-packages/PIL)."
+PIL_INFOS="yag-osdl needs the Python Imaging Library (PIL) for its image handling features. It can be downloaded from: http://www.pythonware.com/products/pil/. Once available, either update PIL_ROOT in this script, or put it in your shell environment (for instance, export PIL_ROOT=<where it is installed>, such as export PIL_ROOT=/usr/lib/python${PYTHON_VERSION}/site-packages/PIL). With gentoo, use 'emerge imaging', with Debian-based distributions use 'apt-get install python-imaging'. "
 
 if [ -z "${PIL_ROOT}" ] ; then
-	# Change this setting according to the place where you installed PIL: 
-	PIL_ROOT=/usr/lib/python2.5/site-packages/PIL
+	# Change this setting according to the place where you installed PIL:
+	PIL_ROOT=/usr/lib/python${PYTHON_VERSION}/site-packages/PIL
 fi
 
 if [ ! -d ${PIL_ROOT} ] ; then
-	echo "\nPython Imaging Library (PIL) not found, expected directory ${PIL_ROOT} to exist (not found, nothing done). ${PIL_INFOS}" 1>&2
+	echo "
+	Python Imaging Library (PIL) not found, expected directory ${PIL_ROOT} to exist (not found, nothing done). ${PIL_INFOS}" 1>&2
 	return
 else	
 
