@@ -4,6 +4,7 @@ USAGE="Usage : `basename $0` [<directory to clean>] : removes all yag-osdl gener
 
 YAG_CREATED_DIR="yag-osdl-resources"
 
+RM=/bin/rm
 
 if [ -z "$1" ] ; then
 	rootDir=`pwd`
@@ -24,14 +25,14 @@ if [ ! -d "$rootDir/$YAG_CREATED_DIR" ] ; then
 	exit 6
 fi	
 		
-echo -e "Warning : will remove all files matching \n\t*.html\n\t*-thumbnail.jpeg\nstarting from directory <${rootDir}>."
+echo -e "Warning : will remove all files matching *.html or *-thumbnail.jpeg, and all directories matching yag-osdl-* starting from directory <${rootDir}> (but others *.jpeg, *.thm and *.txt, etc. will be kept)."
 
 unset value
 read -p "Let's proceed with removal ? (y/n) [n]" value
 if [ "$value" == "y" ]; then
 	echo "Cleaning..."
-	find "${rootDir}" -name '*.html' -exec rm -f '{}' ';'
-	find "${rootDir}" -name '*-thumbnail.jpeg' -exec rm -f '{}' ';'
+	find "${rootDir}" -name '*.html' -o -name '*-thumbnail.jpeg' -exec ${RM} -f '{}' ';' 
+	find "${rootDir}" -name 'yag-osdl-*' -type d -exec ${RM} -rf '{}' ';' 2>/dev/null
 	
 	echo "... finished"
 else
