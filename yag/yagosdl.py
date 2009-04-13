@@ -2,16 +2,19 @@
 
 
 """
-  This is yag-osdl (OSDL's YAG), a thematical HTML multimedia gallery generator.
-  YAG stands for Yet Another Gallery, and yag-osdl is derived from the following work:
-  YAG, Copyright (C) 2002 Stas Z (http://home.planet.nl/~stas.linux/python/yag/)
+  This is yag-osdl (OSDL's YAG), a thematical GPL-licensed HTML multimedia
+  gallery generator.
   
-  To use yag-osdl easily, one should source included 'yag-osdl-environment.sh' to have one's 
-  shell variables correctly checked and set.
+  YAG stands for Yet Another Gallery, and yag-osdl is derived from the following
+  work: YAG, Copyright (C) 2002 Stas Z
+  (see http://home.planet.nl/~stas.linux/python/yag/)
+  
+  To use yag-osdl easily, one should source included 'yag-osdl-environment.sh'
+  to have one's shell variables correctly checked and set.
   Or, even better, use 'run-yag-osdl.sh'
   
-  This script is named yagosdl.py and not yag-osdl.py since '-' are not allowed in the name of
-  python modules.
+  This script is named yagosdl.py and not yag-osdl.py since '-' are not 
+  allowed in the name of python modules.
   
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -33,6 +36,7 @@
         or if it's not in the right format, the theme from the standard
         configuration file will be used.
 		
+		
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation.
@@ -48,7 +52,8 @@
 
 	yag-osdl creates a static html gallery consisting of a index pages with 
 	thumbnails links to pages with the original pictures, and adds pages 
-	allowing to browse the image repository through thematical collections.		
+	allowing to browse the image repository through thematical collections.	
+		
 """
 
 
@@ -1129,5 +1134,3 @@ if __name__ == '__main__':
 	
 	main( contentDir, configFile )
 	
-
-
