@@ -1,1 +1,1 @@
-Look at the doc directory !
+Please look at the doc directory first!
