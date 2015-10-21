@@ -4,16 +4,16 @@
 /* Author : Olivier Boudeville (olivier.boudeville@online.fr) */
 
 
-div.box { 
+div.box {
   border: solid;
   padding : 5px;
   border-width: thin ;
-  background: #303030; 
+  background: #303030;
   text-align: left;
 }
 
 
-div.centered { 
+div.centered {
   text-align: center;
   margin-left: auto;
   margin-right: auto;
@@ -31,7 +31,7 @@ div.open {
 /* red for a closed one */
 div.closed {
   font-family: courier;
-  color: #FF0000;  
+  color: #FF0000;
 
 }
 
@@ -39,7 +39,7 @@ div.closed {
 /* blue for a pending one */
 div.running {
   font-family: courier;
-  color: #0000FF;  
+  color: #0000FF;
 
 }
 
@@ -155,11 +155,11 @@ dl {
 
 dt {
   color: #EFEFEF;
-  font-weight: bold; 
+  font-weight: bold;
   margin-left: 0%;
   margin-right: 0%;
   margin-top: 2%;
-  margin-bottom: 1%;  
+  margin-bottom: 1%;
   background: #5E5E5E;
 }
 
@@ -168,7 +168,7 @@ dd {
   font-size: 16px;
   font-weight: normal;
   margin-bottom: 12px;
-} 
+}
 
 
 p {
@@ -187,7 +187,7 @@ ul {
   margin-bottom: 1%;
   margin-left: 5%;
   text-align: left;
-  list-style: square;		
+  list-style: square;
   margin-right: 0%;
 }
 
@@ -199,23 +199,23 @@ ol {
   margin-bottom: 1%;
   margin-left: 5%;
   text-align: left;
-  font-weight: bold;  
-  list-style: decimal;		
+  font-weight: bold;
+  list-style: decimal;
   margin-right: 0%;
 }
 */
 
 
 ul li {
-  color: #DADADA; 
+  color: #DADADA;
   margin-left: 0%;
-  margin-right: 0%; 
+  margin-right: 0%;
   list-style: square;
 }
 
 
 ol li {
-  color: #DADADA; 
+  color: #DADADA;
   margin-left: 5%;
   margin-right: 0%;
   list-style: decimal;
@@ -233,13 +233,13 @@ ul ul ul li {
 
 
 dd ul li {
-  font-size: 16px;  
+  font-size: 16px;
   font-weight: bold;
-  color: #BABABA;	
+  color: #BABABA;
 }
 
-	
-pre {  
+
+pre {
   color: #BABABA ;
   font-family: monospace;
   margin-left: 4%;
@@ -248,10 +248,10 @@ pre {
 
 
 table {
-  color: #DADADA;  
+  color: #DADADA;
   margin: 5px;
-  border: solid; 
-  border-width: thin; 
+  border: solid;
+  border-width: thin;
   border-collapse: separate;
   border-spacing: 5pt;
 }
@@ -262,7 +262,7 @@ table caption {
  caption-side: bottom;
  text-align: center;
  font-style: italic;
-} 
+}
 
 
 table p, table dl, ol p, ul p, dl p, blockquote p, .note p, .note ul, .note ol, .note dl, li pre, dd pre {
@@ -279,10 +279,10 @@ tr {
 }
 
 
-th { 
+th {
    background : #000000;
    color: #EFEFEF;
-   font-family: arial, helvetica, sans-serif; 
+   font-family: arial, helvetica, sans-serif;
    font-weight: bold;
    font-size: 19px;
    text-align: center;
@@ -290,7 +290,7 @@ th {
 
 
 td {
-   background : #000000; 
+   background : #000000;
    font-family: arial, helvetica, sans-serif;
    font-size: 15px;
 }
@@ -336,18 +336,18 @@ td a {
 
 
 a:link {
-  color:#FFFFFF; 
+  color:#FFFFFF;
   background: transparent;
   font-weight: bold;
   text-decoration: none;
   /*font-size: 110%;  */
 }
-  
+
 
 a:visited {
   color: #FFFFFF;
   background: transparent;
-  font-weight: bold;  
+  font-weight: bold;
   text-decoration: none;
 }
 
@@ -355,14 +355,14 @@ a:visited {
 a:active {
   color: #FFFFFF;
   background: transparent;
-  font-weight: bold;  
+  font-weight: bold;
   text-decoration: none;
 }
 
 
-a:hover { 
+a:hover {
   text-decoration:underline;
-  font-weight: bold; 
+  font-weight: bold;
   color:#FFFFFF;
 }
 
@@ -370,14 +370,14 @@ a:hover {
 code {
   color: #B5B5B5 ;
   font-size: 17px;
-  font-weight: normal;   
+  font-weight: normal;
   font-family: Courier;
   /* disabled :
   border-left-style: solid;
   border-left-width: 3px;
   border-right-style: none;
   border-top-style: none;
-  border-bottom-style: none; 
+  border-bottom-style: none;
   */
 }
 
@@ -407,7 +407,7 @@ div.banner {
 
 
 div.banner p {
-  margin-left: 0em; 
+  margin-left: 0em;
   padding:  0em;
   font-family: Arial, sans-serif;
   background: #808080;
@@ -422,7 +422,7 @@ div.banner p {
 
 div.banner a, div.banner em { display: block; margin: 0em; }
 div.banner a, div.banner em { border-top: 2px groove #EEEEEE; } /* separator */
-div.banner a:first-child { border-top: none; } 
+div.banner a:first-child { border-top: none; }
 div.banner em { color: #FFFFFF; font-weight: bold; } /* head of column */
 
 div.banner a:link { text-decoration: none; color: #EEEEEE; }
