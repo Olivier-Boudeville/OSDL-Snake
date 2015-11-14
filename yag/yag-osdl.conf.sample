@@ -1,17 +1,22 @@
 [Options]
 
 # This must be a valid filename (no white-space, no special character)
-project_name          = OSDL-data
+project_name          = My-Example
 
-# One may prefer absolute paths for simpler management.
+# One may prefer absolute paths for simpler management.
 
 content_directory     = /home/sye/Projects/OSDL-data/exported-data/snapshots
-resource_directory    = /home/sye/Projects/Tools/yag/yag-osdl-0.6/Resources
+#resource_directory    = /home/sye/Projects/Tools/yag/yag-osdl-0.6/Resources
 
-output_in_content     = True
-output_directory      = /home/sye/Projects/Tools/yag/yag-osdl-0.6/output
+#output_in_content     = True
+#output_directory      = /home/sye/Projects/Tools/yag/yag-osdl-0.6/output
 
-theme                 = OSDL-theme
+output_in_content     = False
+output_directory      = /tmp/My-Example-Output
+
+
+#theme                 = OSDL-theme
+theme                 = OSDL-french-theme
 
 thumbsize             = 120
 images_by_row         = 4
@@ -24,4 +29,3 @@ author_mail           = olivier.boudeville@esperide.com
 
 gallery_license_file  = gallery-license.txt
 gallery_info_file     = gallery-info.txt
-
