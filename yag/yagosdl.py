@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 
 
 """This is yag-osdl (OSDL's YAG), a thematical GPL-licensed HTML multimedia
@@ -57,7 +58,7 @@
 
 
 # Imports standard python modules:
-import os, os.path, sys, string, shutil, tempfile, time
+import os, os.path, sys, string, shutil, tempfile, time, locale
 
 # For Python2:
 import ConfigParser
@@ -66,7 +67,8 @@ import ConfigParser
 #import configparser
 
 
-# PIL (Picture Image Library, see http://www.pythonware.com/library/pil/handbook/index.htm)
+# PIL (Picture Image Library, see
+# http://www.pythonware.com/library/pil/handbook/index.htm)
 from PIL import Image
 
 
@@ -144,13 +146,21 @@ class NodeTheme( dataUtils.Node ):
 
         res = "<p>"
         if len( self.referencedContent ):
-            res += "This theme references following content:\n<ul>"
+            if mainDic[ 'language' ] == 'French':
+                res += u'Ce thème référence les contenus suivants :\n<ul>'
+            else:
+               res += u'This theme references following content:\n<ul>'
+
             for t in self.referencedContent:
                 content_name, content_page_file = t
                 res += '\t<li><a href="%s">%s</a></li>' % ( content_page_file, content_name )
             res += "</ul>"
         else:
-            res += "This theme does not reference directly any content."
+            if mainDic[ 'language' ] == 'French':
+                res += u'Ce thème ne référence directement aucun contenu.'
+            else:
+                res += u'This theme does not reference directly any content.'
+
         return res + "</p>"
 
 
@@ -161,14 +171,25 @@ class NodeTheme( dataUtils.Node ):
         res = "<p>"
         if len( self.getChildren() ):
             if len( self.getChildren() ) == 1:
-                res += 'This theme has ony one sub-theme: <a href="%s">%s</a>' % ( convertThemeToFilename( self.children[0].getName() ), self.children[0].getName() )
+                if mainDic[ 'language' ] == 'French':
+                    res += u'Ce thème comporte un seul sous-thème: <a href="%s">%s</a>' % ( convertThemeToFilename( self.children[0].getName() ), self.children[0].getName() )
+                else:
+                    res += u'This theme has ony one sub-theme: <a href="%s">%s</a>' % ( convertThemeToFilename( self.children[0].getName() ), self.children[0].getName() )
             else:
-                res += "This theme has following sub-themes:\n<ul>"
-                for c in self.getChildren():
-                    res += '\t<li><a href="%s">%s</a></li>' % ( convertThemeToFilename( c.getName() ), c.getName() )
-                    res += "</ul>"
+                 if mainDic[ 'language' ] == 'French':
+                     res += u'Ce thème inclut les sous-thèmes suivants :\n<ul>'
+                 else:
+                     res += u'This theme has following sub-themes:\n<ul>'
+
+                 for c in self.getChildren():
+                     res += '\t<li><a href="%s">%s</a></li>' % ( convertThemeToFilename( c.getName() ), c.getName() )
+                     res += "</ul>"
         else:
-            res += "This theme has no sub-theme."
+            if mainDic[ 'language' ] == 'French':
+                res += u'Ce thème ne comporte aucun sous-thème.'
+            else:
+                res += "This theme has no sub-theme."
+
         return res + "</p>"
 
 
@@ -181,9 +202,16 @@ def initTokenDic():
 
     # Token dictionary keeps the current values during recursion, as opposed to the main dic:
 
+    # Use 'locale -a' to check supported locales:
+    if mainDic[ 'language' ] == 'French':
+        locale.setlocale( locale.LC_TIME, "fr_FR.utf8" )
+        date = time.strftime( '%A, %d %B %Y', time.localtime() )
+    else:
+        date = time.strftime( '%A, %d %B %Y', time.localtime() )
+
     tokenDic = {
         'YAG-OSDL-TOKEN-PROJECT-NAME'     : mainDic[ 'project_name' ],
-        'YAG-OSDL-TOKEN-DATE'             : time.strftime( '%A, %d %B %Y', time.localtime() ),
+        'YAG-OSDL-TOKEN-DATE'             : date,
         'YAG-OSDL-TOKEN-GENERATOR'        : str(yag_osdl_version),
         'YAG-OSDL-TOKEN-CONTENT-DIRECTORY': mainDic[ 'content_directory' ],
         'YAG-OSDL-TOKEN-OUTPUT-DIRECTORY' : mainDic[ 'output_directory' ],
@@ -384,8 +412,12 @@ def handleThemesFor( graphicFileName, themes_list ):
         """
         direct_theme_dir = os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-ROOT-PATH' ],
                 resourceDirectoryName )
+
         # Put 'T' image:
-        theme_text = '<p><img src="' + os.path.join( direct_theme_dir, 'theme.png' ) + '" alt="[Themes]" width="16"></img> This image belongs to the following themes:<ul>'
+        if mainDic[ 'language' ] == 'French':
+            theme_text = u'<p><img src="' + os.path.join( direct_theme_dir, 'theme.png' ) + '" alt="[Themes]" width="16"></img> :<ul>'
+        else:
+            theme_text = '<p><img src="' + os.path.join( direct_theme_dir, 'theme.png' ) + '" alt="[Themes]" width="16"></img> This image belongs to the following themes:<ul>'
 
         updateThemeTree( themes_list )
 
@@ -407,7 +439,7 @@ def getThemeHTMLSubTree( node, offset = 0, nextOffset = 0, isFirstChild = True )
 
         __ a __ b
                   |_ c __ d __ e
-                                        |_ f
+                       |_ f
                   |_ g
 
         offset is the current position where to write
@@ -435,7 +467,10 @@ def getThemeHTMLSubTree( node, offset = 0, nextOffset = 0, isFirstChild = True )
 
                 node_text = string.ljust( internal_text, nextOffset - offset + 1 )
         else:
-                node_text = string.ljust( 'Root theme', nextOffset - offset + 1 )
+            if mainDic[ 'language' ] == 'French':
+                node_text = string.ljust( u'Thème racine', nextOffset - offset + 1 )
+            else:
+                node_text = string.ljust( u'Root theme', nextOffset - offset + 1 )
 
         if isFirstChild:
                 res += branchFirst + node_text
@@ -743,14 +778,14 @@ def generateOverview( graphics, pageCount, totalPageCount, comment, rootLevel ):
         overview_file.write( updateFromTokenDic( header_page_file.read().decode( encoding ) ).encode( encoding ) )
 
         if rootLevel:
-            overview_file.write( "<p>Select in the left panel your preferred browsing scheme and any gallery you want to display.</p>".encode( encoding ) )
+            if mainDic[ 'language' ] == 'French':
+                overview_file.write( u'<p>Sélectionner dans le menu de gauche le mode de navigation que vous préférez, ou toute galerie que vous souhaitez consulter.</p>'.encode( encoding ) )
+            else:
+                overview_file.write( u'<p>Select in the left panel your preferred browsing scheme and any gallery you want to display.</p>'.encode( encoding ) )
 
         if not len( managed ):
             overview_file.write( updateFromTokenDic( footer_page_file.read().decode( encoding ) ).encode( encoding ) )
             return
-
-        print( "ROOT = %s" % (rootLevel,) )
-  
 
         # Computes the number of sub-galleries:
         if not totalPageCount:
@@ -771,17 +806,33 @@ def generateOverview( graphics, pageCount, totalPageCount, comment, rootLevel ):
 
         if pageCount:
             if pageCount == 1:
-                overview_file.write( ' [<a href="Overview.html">First sub-gallery</a>] '.encode( encoding ) )
+                if mainDic[ 'language' ] == 'French':
+                    overview_file.write( u'[<a href="Overview.html">Première sous-galerie</a>]'.encode( encoding ) )
+                else:
+                    overview_file.write( '[<a href="Overview.html">First sub-gallery</a>]'.encode( encoding ) )
             else:
-                overview_file.write( ( ' [<a href="Overview-' + repr(pageCount-1) + '.html">Previous sub-gallery</a>] ' ).encode( encoding ) )
+               if mainDic[ 'language' ] == 'French':
+                   overview_file.write( ( u'[<a href="Overview-' + repr(pageCount-1) + '.html">Sous-galerie précédente</a>]' ).encode( encoding ) )
+               else:
+                   overview_file.write( ( '[<a href="Overview-' + repr(pageCount-1) + '.html">Previous sub-gallery</a>]' ).encode( encoding ) )
+
         if len( remainder ):
             if pageCount +2 == totalPageCount:
-                overview_file.write( ( ' [<a href="Overview-' + repr(pageCount+1) + '.html">Last sub-gallery</a>] ' ).encode( encoding ) )
+              if mainDic[ 'language' ] == 'French':
+                   overview_file.write( ( u'[<a href="Overview-' + repr(pageCount+1) + '.html">Dernière sous-galerie</a>]' ).encode( encoding ) )
+              else:
+                   overview_file.write( ( u'[<a href="Overview-' + repr(pageCount+1) + '.html">Last sub-gallery</a>]' ).encode( encoding ) )
+
             else:
-                overview_file.write( ( ' [<a href="Overview-' + repr(pageCount+1) + '.html">Next sub-gallery</a>] ' ).encode( encoding ) )
+              if mainDic[ 'language' ] == 'French':
+                   overview_file.write( ( u'[<a href="Overview-' + repr(pageCount+1) + '.html">Sous-galerie suivante</a>]' ).encode( encoding ) )
+              else:
+                   overview_file.write( ( '[<a href="Overview-' + repr(pageCount+1) + '.html">Next sub-gallery</a>]' ).encode( encoding ) )
 
-
-        overview_file.write( updateFromTokenDic( '<br><br><table border="1" summary="Thumbnails for YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY"><caption>Thumbnails for gallery YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY, click to enlarge</caption>' ).encode( encoding ) )
+        if mainDic[ 'language' ] == 'French':
+            overview_file.write( updateFromTokenDic( u'<br><br><table border="1" summary="Vignettes pour YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY"><caption>Vignettes pour la galerie YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY, cliquer pour agrandir</caption>' ).encode( encoding ) )
+        else:
+            overview_file.write( updateFromTokenDic( '<br><br><table border="1" summary="Thumbnails for YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY"><caption>Thumbnails for gallery YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY, click to enlarge</caption>' ).encode( encoding ) )
 
         for g in managed:
             full_path = os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ], g )
@@ -820,7 +871,12 @@ def generateOverview( graphics, pageCount, totalPageCount, comment, rootLevel ):
                 if not len( graphics_to_pop ):
                     break
 
-            overview_file.write( '</table></center></p><br><br><p><b>Quick nav-by-name tab</b>:<br><br><ul>'.encode( encoding ) )
+            if mainDic[ 'language' ] == 'French':
+                overview_file.write( '</table></center></p><br><br><p><b>Navigation rapide selon les noms</b> :<br><br><ul>'.encode( encoding ) )
+            else:
+                overview_file.write( '</table></center></p><br><br><p><b>Quick nav-by-name tab</b>:<br><br><ul>'.encode( encoding ) )
+
+
             for g in managed:
                 to_write = '<li>[<a href="' + convertIntoFileName( g ) + '.html">' + g + '</a>]</li>'
                 overview_file.write( to_write.encode( encoding ) )
@@ -845,8 +901,6 @@ def removeThumbnailsFrom( fileList ):
 def processDirectory( rootLevel ):
         """Generates all information regarding the specified directory."""
 
-        print( "MYROOT = %s" % (rootLevel,))
-        
         if os.path.basename( tokenDic[ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ] ) == resourceDirectoryName:
             print( "Ignoring yag's own resource directory <%s>." % ( resourceDirectoryName, ) )
 
@@ -1219,6 +1273,7 @@ def main( contentDir=None, configFilename=None ):
                 'output_in_content'    : 'False',
                 'output_directory'     : os.path.join( os.getcwd(), 'output' ),
                 'theme'                : 'Default-theme',
+                'language'             : 'English',
                 'thumbsize'            : '60',
                 'images_by_row'        : '3',
                 'images_by_column'     : '3',
