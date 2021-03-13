@@ -1,4 +1,6 @@
-Release 0.6 (Sunday, March 2, 2008): 
+Release 0.8 (Friday, March 5, 2021): updates (ex: shell) and improvements (icons) after a new use
+
+Release 0.6 (Sunday, March 2, 2008):
 	* generated interface improved
 	* some bugs fixed (theme tree)
 	* some updates (tool versions)
@@ -15,6 +17,6 @@ Initial release
 Initial work inspired from YAG from Stas Z (linuxisbeter@yahoo.com) [GPL-2]
 (homepage : http://home.planet.nl/~stas.linux/python/yag/).
 
-Improved and used for the OSDL project (http://osdl.sourceforge.net) by Olivier Boudeville (olivier.boudeville@online.fr).
+Improved and used for the OSDL project (https://github.com/Olivier-Boudeville/OSDL-Snake/tree/master/yag) by Olivier Boudeville (olivier.boudeville@online.fr).
 
 
