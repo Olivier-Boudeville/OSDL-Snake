@@ -1,19 +1,21 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 
-"""This is yag-osdl (OSDL's YAG), a thematical GPL-licensed HTML multimedia
-  gallery generator.
+"""This is yag-osdl (OSDL's YAG), a thematical GPL-licenced HTML gallery
+  generator.
 
   YAG stands for Yet Another Gallery, and yag-osdl is derived from the following
-  work: YAG, Copyright (C) 2002 Stas Z
+  work: YAG, copyright (C) 2002 Stas Z
   (see http://home.planet.nl/~stas.linux/python/yag/)
+  yag-osdl is copyright (C) 2007-2021 Olivier Boudeville
+  (olivier (dot) boudeville (at) esperide (dot) com)
 
-  To use yag-osdl easily, one should source included 'yag-osdl-environment.sh'
-  to have one's shell variables correctly checked and set.  Or, even better, use
-  'run-yag-osdl.sh'
+  To use yag-osdl easily, one should source the included
+  'yag-osdl-environment.sh' to have one's shell variables correctly checked and
+  set. Or, even better, use 'run-yag-osdl.sh'.
 
-  This script is named yagosdl.py and not yag-osdl.py since '-' are not allowed
+  This script is named yagosdl.py and not yag-osdl.py since '-' is not allowed
   in the name of python modules.
 
   This program is distributed in the hope that it will be useful, but WITHOUT
@@ -21,21 +23,24 @@
   FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
   details.
 
-  Usage: yagosdl.py [content directory] [-h]
+  Usage: yagosdl.py [content directory] [-h] [-v]
 
-    -h  Help. Displays this usage message and exits.
+    -h or --help: displays this usage message and exits
 
-    -v Version. Shows yag-osdl's version and exits.
+    -v or --version: displays yag-osdl's version and exits
+    help_options    = ['-h',  '--help']
+    config_options  = ['-rc', '--config']
+    version_options = ['-v',  '--version']
 
   The following arguments override the options from the configuration file.
 
-    -rc name. Alternative configuration file to be used.
-        If it cannot be found the standard yag-osdl.conf file will be used.
+    -rc FILENAME or --config FILENAME: alternative configuration file to be
+        used. If none is specified, a default yag-osdl.conf file will be looked
+        up
 
-    -th name.  Name of the theme to be used. If the theme can't be found, or if
-        it's not in the right format, the theme from the standard configuration
+    -th name: name of the theme to be used. If the theme cannot be found, or if
+        it is not in the right format, the theme from the standard configuration
         file will be used.
-
 
         This program is free software; you can redistribute it and/or modify it
         under the terms of the GNU General Public License as published by the
@@ -58,17 +63,19 @@
 
 
 # Imports standard python modules:
-import os, os.path, sys, string, shutil, tempfile, time, locale
+import os, os.path, sys, string, distutils.util, shutil, tempfile, time, locale
 
 # For Python2:
-import ConfigParser
+#import ConfigParser
 
 # For Python3:
-#import configparser
+import configparser
 
 
 # PIL (Picture Image Library, see
-# http://www.pythonware.com/library/pil/handbook/index.htm)
+# http://www.pythonware.com/library/pil/handbook/index.htm) and run-yag-osdl.sh
+# for installation details (pip, virtual env, etc.)
+#
 from PIL import Image
 
 
@@ -76,13 +83,13 @@ from PIL import Image
 from toolbox import *
 
 # Imports basic common services:
-import generalUtils
+import general_utils
 
 # Imports file extended services:
-import fileUtils
+import file_utils
 
 # Imports data services for trees of themes:
-import dataUtils
+import data_utils
 
 
 
@@ -90,73 +97,78 @@ yag_osdl_version = 0.7
 
 yag_general_theme_file = 'yag-overall-themes.thm'
 yag_general_theme_page = 'yag-theme-map.html'
-htmlExtension    = '.html'
-jpegExtension    = '.jpeg'
-commentExtension = '.txt'
-themeExtension   = '.thm'
-
-encoding = 'utf-8'
 
 
-# if you change it, change it too in template files:
-resourceDirectoryName = 'yag-osdl-resources'
-themeDirectoryName    = 'yag-osdl-parsed-themes'
+# Extensions:
 
-galleryCommentFilename = 'yag-gallery-comment.txt'
+html_extension    = '.html'
+jpeg_extension    = '.jpeg'
+comment_extension = '.txt'
+theme_extension   = '.thm'
+
+yag_encoding = 'utf-8'
 
 
-class YagException( ApplicationException ):
+# If you change it, change it too in template files:
+resource_directory_name = 'yag-osdl-resources'
+theme_directory_name = 'yag-osdl-parsed-themes'
+
+gallery_comment_filename = 'yag-gallery-comment.txt'
+
+
+class YagException(ApplicationException):
     """Base class for exceptions raised in yag-osdl module."""
 
 
-class NodeTheme( dataUtils.Node ):
+class NodeTheme(data_utils.Node):
     """
-    Describes a theme, whose children are sub-themes, whose content is the theme name.
-    Each NodeTheme carries to a list of tuples (content name, content's full web page)
-    corresponding to all media content belonging to this theme.
+    Describes a theme, whose children are sub-themes, whose content is the theme
+    name.
+    Each NodeTheme carries to a list of tuples (content name, content's full web
+    page) corresponding to all media content belonging to this theme.
     """
 
 
-    def __init__( self, name ):
-        dataUtils.Node.__init__( self )
-        self.referencedContent = []
+    def __init__(self, name):
+        data_utils.Node.__init__(self)
+        self.referenced_content = []
         self.content = name
 
 
-    def addContent( self, contentName, contentpageFileName ):
+    def add_content(self, content_name, content_page_filename):
         """
-        Adds a tuple (content name, content's full web page) corresponding
+        Adds a (content name, content's full web page) pair corresponding
         to media content belonging to this theme.
         """
-        # As contentpageFileName is an absolute path it has to be converted
+        # As content_page_filename is an absolute path it has to be converted
         # in a relative one:
-        new_relative_path = '..' + contentpageFileName.replace( mainDic[ 'content_directory' ], '' )
-        self.referencedContent.append( (contentName, new_relative_path ) )
+        new_relative_path = '..' + content_page_filename.replace(main_dic['content_directory'], '')
+        self.referenced_content.append((content_name, new_relative_path))
 
 
-    def getName( self ):
+    def get_name(self):
         return self.content
 
 
-    def generateHTMLReferencedContent( self ):
+    def generate_html_referenced_content(self):
         """
-        Returns the HTML code corresponding to the referenced content belonging to
-        this theme.
+        Returns the HTML code corresponding to the referenced content belonging
+        to this theme.
         """
 
         res = "<p>"
-        if len( self.referencedContent ):
-            if mainDic[ 'language' ] == 'French':
+        if self.referenced_content:
+            if main_dic['language'] == 'French':
                 res += u'Ce thème référence les contenus suivants :\n<ul>'
             else:
                res += u'This theme references following content:\n<ul>'
 
-            for t in self.referencedContent:
+            for t in self.referenced_content:
                 content_name, content_page_file = t
-                res += '\t<li><a href="%s">%s</a></li>' % ( content_page_file, content_name )
+                res += '\t<li><a href="%s">%s</a></li>' % (content_page_file, content_name)
             res += "</ul>"
         else:
-            if mainDic[ 'language' ] == 'French':
+            if main_dic['language'] == 'French':
                 res += u'Ce thème ne référence directement aucun contenu.'
             else:
                 res += u'This theme does not reference directly any content.'
@@ -165,27 +177,31 @@ class NodeTheme( dataUtils.Node ):
 
 
 
-    def generateHTMLSubThemes( self ):
-        """Returns the HTML code corresponding to the referenced content belonging to this theme."""
+    def generate_html_sub_themes(self):
+        """
+        Returns the HTML code corresponding to the referenced content belonging
+        to this theme.
+        """
 
         res = "<p>"
-        if len( self.getChildren() ):
-            if len( self.getChildren() ) == 1:
-                if mainDic[ 'language' ] == 'French':
-                    res += u'Ce thème comporte un seul sous-thème: <a href="%s">%s</a>' % ( convertThemeToFilename( self.children[0].getName() ), self.children[0].getName() )
+        len = self.get_children()
+        if len:
+            if len == 1:
+                if main_dic['language'] == 'French':
+                    res += u'Ce thème comporte un seul sous-thème: <a href="%s">%s</a>' % (convert_theme_to_filename(self.children[0].get_name()), self.children[0].get_name())
                 else:
-                    res += u'This theme has ony one sub-theme: <a href="%s">%s</a>' % ( convertThemeToFilename( self.children[0].getName() ), self.children[0].getName() )
+                    res += u'This theme has ony one sub-theme: <a href="%s">%s</a>' % (convert_theme_to_filename(self.children[0].get_name()), self.children[0].get_name())
             else:
-                 if mainDic[ 'language' ] == 'French':
+                 if main_dic['language'] == 'French':
                      res += u'Ce thème inclut les sous-thèmes suivants :\n<ul>'
                  else:
                      res += u'This theme has following sub-themes:\n<ul>'
 
-                 for c in self.getChildren():
-                     res += '\t<li><a href="%s">%s</a></li>' % ( convertThemeToFilename( c.getName() ), c.getName() )
+                 for c in self.get_children():
+                     res += '\t<li><a href="%s">%s</a></li>' % (convert_theme_to_filename(c.get_name()), c.get_name())
                      res += "</ul>"
         else:
-            if mainDic[ 'language' ] == 'French':
+            if main_dic['language'] == 'French':
                 res += u'Ce thème ne comporte aucun sous-thème.'
             else:
                 res += "This theme has no sub-theme."
@@ -195,27 +211,28 @@ class NodeTheme( dataUtils.Node ):
 
 
 
-def initTokenDic():
-    """Put hardcoded default values in token dictionary."""
+def init_token_dic():
+    """Sets default values in token dictionary."""
 
-    global tokenDic
+    global token_dic
 
-    # Token dictionary keeps the current values during recursion, as opposed to the main dic:
+    # Token dictionary keeps the current values during recursion, as opposed to
+    # the main dic:
 
     # Use 'locale -a' to check supported locales:
-    if mainDic[ 'language' ] == 'French':
-        locale.setlocale( locale.LC_TIME, "fr_FR.utf8" )
-        date = time.strftime( '%A, %d %B %Y', time.localtime() )
+    if main_dic['language'] == 'French':
+        locale.setlocale(locale.LC_TIME, "fr_FR.utf8")
+        date = time.strftime('%A, %d %B %Y', time.localtime())
     else:
-        date = time.strftime( '%A, %d %B %Y', time.localtime() )
+        date = time.strftime('%A, %d %B %Y', time.localtime())
 
-    tokenDic = {
-        'YAG-OSDL-TOKEN-PROJECT-NAME'     : mainDic[ 'project_name' ],
+    token_dic = {
+        'YAG-OSDL-TOKEN-PROJECT-NAME'     : main_dic['project_name'],
         'YAG-OSDL-TOKEN-DATE'             : date,
         'YAG-OSDL-TOKEN-GENERATOR'        : str(yag_osdl_version),
-        'YAG-OSDL-TOKEN-CONTENT-DIRECTORY': mainDic[ 'content_directory' ],
-        'YAG-OSDL-TOKEN-OUTPUT-DIRECTORY' : mainDic[ 'output_directory' ],
-        'YAG-OSDL-TOKEN-THEME'            : mainDic[ 'theme' ],
+        'YAG-OSDL-TOKEN-CONTENT-DIRECTORY': main_dic['content_directory'],
+        'YAG-OSDL-TOKEN-OUTPUT-DIRECTORY' : main_dic['output_directory'],
+        'YAG-OSDL-TOKEN-THEME'            : main_dic['theme'],
         'YAG-OSDL-TOKEN-ROOT-PATH'        : None,
         'YAG-OSDL-CURRENT-CONTENT-RAW'    : None,
         'YAG-OSDL-CURRENT-CONTENT-TXT'    : None,
@@ -225,1164 +242,1026 @@ def initTokenDic():
         'YAG-OSDL-THEME-TREE'             : ''
     }
 
-    if mainDic[ 'author' ]:
-        tokenDic[ 'YAG-OSDL-TOKEN-AUTHOR' ] = mainDic[ 'author' ]
+    if main_dic['author']:
+        token_dic['YAG-OSDL-TOKEN-AUTHOR'] = main_dic['author']
     else:
-        tokenDic[ 'YAG-OSDL-TOKEN-AUTHOR' ] = '(no author was specified)'
+        token_dic['YAG-OSDL-TOKEN-AUTHOR'] = '(no author was specified)'
 
-    if mainDic[ 'author_mail' ]:
-        tokenDic[ 'YAG-OSDL-TOKEN-CONTACT' ] = mainDic[ 'author_mail' ]
+    if main_dic['author_mail']:
+        token_dic['YAG-OSDL-TOKEN-CONTACT'] = main_dic['author_mail']
     else:
-        tokenDic[ 'YAG-OSDL-TOKEN-CONTACT' ] = '(no mail address was specified)'
+        token_dic['YAG-OSDL-TOKEN-CONTACT'] = '(no mail address was specified)'
 
-    license_file = mainDic[ 'gallery_license_file' ]
+    license_file = main_dic['gallery_license_file']
     if license_file:
-        if os.path.isfile( license_file ):
-            outputDevice.debug( 'Gallery license file found (<%s>).' % ( license_file, ) )
-            tokenDic[ 'YAG-OSDL-GALLERY-LICENSE' ] = '<br><h2>Gallery license</h2><p>' + file( license_file, 'r' ).read().decode( encoding ) + '</p>'
+        if os.path.isfile(license_file):
+            output_device.debug("Gallery license file found ('%s')." % (license_file,))
+            with open(license_file, 'r', encoding=yag_encoding) as f:
+                token_dic['YAG-OSDL-GALLERY-LICENSE'] = '<br><h2>Gallery license</h2><p>' + f.read() + '</p>'
         else:
-            outputDevice.debug( 'Gallery license file not found (<%s>).' % ( license_file, ) )
+            output_device.debug("Gallery license file not found ('%s')." % (license_file,))
 
     else:
-        outputDevice.debug( 'No gallery license file specified.' )
+        output_device.debug("No gallery license file specified.")
 
-    info_file = mainDic[ 'gallery_info_file' ]
-    if info_file:
-        if os.path.isfile( info_file ):
-            outputDevice.debug( 'Gallery information file found (<%s>).' % ( info_file, ) )
-            tokenDic[ 'YAG-OSDL-GALLERY-INFO' ] = '<br><h2>Gallery recommended usage &amp; hints</h2><p>' + file( info_file, 'r' ).read().decode( encoding ) + '</p><br>'
+    info_filepath = main_dic['gallery_info_file']
+    if info_filepath:
+        if os.path.isfile(info_filepath):
+            output_device.debug("Gallery information file found ('%s')." % (info_filepath,))
+            with open(info_filepath, 'r', encoding=yag_encoding) as f:
+                token_dic['YAG-OSDL-GALLERY-INFO'] = '<br><h2>Gallery recommended usage &amp; hints</h2><p>' + f.read() + '</p><br>'
         else:
-            outputDevice.debug( 'Gallery information file not found (<%s>).' % ( info_file, ) )
+            output_device.debug("Gallery information file not found ('%s')." % (info_filepath,))
     else:
-        outputDevice.debug( 'No gallery information file specified.' )
+        output_device.debug("No gallery information file specified.")
 
 
 
-def generateThumbnail( imageFilename, thumbnailSizePair ):
+def generate_thumbnail(image_filename, thumbnail_size_pair):
+    """Generates a JPEG thumbnail for specified image, no matter its original
+    format.
+
+    The thumbnail will be no bigger than specified size, aspect ratio is
+    preserved.
+
+    Copies as well the original images if the output is not to be made in
+    content.
+
+    Ex: generate_thumbnail('MyPicture.png', (100, 120)).
     """
-    Generates a JPEG thumbnail for specified image, no matter its original format.
-    The thumbnail will be no bigger than specified size, aspect ratio is preserved.
-    Copies as well the original images if the output is not to be made in content.
-    Ex: generateThumbnail( 'MyPicture.png', (100, 120) ).
-    """
 
-    output_dir = mainDic[ 'output_directory' ]
+    output_dir = main_dic['output_directory']
 
-    image_abs_path = os.path.join( output_dir, imageFilename )
+    image_abs_path = os.path.join(output_dir, image_filename)
 
-    content_base_dir = mainDic[ 'content_directory' ]
+    content_base_dir = main_dic['content_directory']
 
-    image_new_abs_path = image_abs_path.replace( content_base_dir, output_dir, 1 )
+    image_new_abs_path = image_abs_path.replace(content_base_dir, output_dir, 1)
 
-    thumbnailFile = os.path.splitext( image_new_abs_path )[0] + '-thumbnail.jpeg'
+    thumbnailFile = os.path.splitext(image_new_abs_path)[0] + '-thumbnail.jpeg'
 
-    #outputDevice.debug( 'Thumbnailing <%s> in <%s> with size %s.' % ( image_abs_path, thumbnailFile, repr(thumbnailSizePair) ) )
+    #output_device.debug("Thumbnailing '%s' in '%s' with size %s." % (image_abs_path, thumbnailFile, repr(thumbnail_size_pair)))
 
-    #outputDevice.info( 'Thumbnailing <%s> with size %s>.' % ( image_abs_path, repr(thumbnailSizePair) ) )
+    #output_device.info("Thumbnailing '%s' with size %s>." % (image_abs_path, repr(thumbnail_size_pair)))
 
-    if not os.path.exists( image_abs_path ):
-        raise YagException( 'generateThumbnail: image file <%s> not found.' % ( image_abs_path, ) )
+    if not os.path.exists(image_abs_path):
+        raise YagException("generate_thumbnail: image file '%s' not found." % (image_abs_path,))
 
-    if mainDic[ 'output_in_content' ] == 'False':
-        shutil.copy( image_abs_path, image_new_abs_path )
+    if not main_dic['output_in_content']:
+        shutil.copy(image_abs_path, image_new_abs_path)
 
-    image = Image.open( image_abs_path )
+    image = Image.open(image_abs_path)
 
     if image.mode != 'RGB':
         image = image.convert('RGB')
 
-    image.thumbnail( thumbnailSizePair, Image.ANTIALIAS )
+    image.thumbnail(thumbnail_size_pair, Image.ANTIALIAS)
 
-    image.save( thumbnailFile, 'JPEG' )
+    image.save(thumbnailFile, 'JPEG')
 
-#        except IOError as e:
-#                raise YagException( 'Cannot create thumbnail for <%s> (I/O error: %s).' % ( imageFilename, e.strerror ) )
-#        except:
-#                raise YagException( 'Cannot create thumbnail for <%s>.' % ( imageFilename, ) )
+#   except IOError as e:
+#       raise YagException("Cannot create thumbnail for '%s' (I/O error: %s)." % (image_filename, e.strerror))
+#   except:
+#       raise YagException("Cannot create thumbnail for '%s'." % (image_filename,))
 
 
 
-def getFullPageFilenameFromGraphic( graphicFileName ):
+def get_full_page_filename_from_graphic(graphic_filename):
     """Returns a file name corresponding to the specified graphic file."""
-    return os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-OUTPUT-DIRECTORY' ], convertIntoFileName( graphicFileName ) + htmlExtension )
+    return os.path.join(token_dic['YAG-OSDL-TOKEN-OUTPUT-DIRECTORY'], convert_into_filename(graphic_filename) + html_extension)
 
 
 
-def updateFromTokenDic( aString ):
-    """Replaces in specified string all key listed in token dictionary by their value."""
-    for ( k, v ) in tokenDic.items():
-        #outputDevice.debug( 'Replacing token <%s> by <%s>.' % ( k, v ) )
-        if isinstance( v, str ) or isinstance( v, unicode ):
-            aString = aString.replace( k, v )
+def update_from_token_dic(a_string):
+    """Replaces in specified string all key listed in token dictionary by their
+value."""
+
+    for (k, v) in token_dic.items():
+        #output_device.debug("Replacing token '%s' by '%s'." % (k, v))
+        if isinstance(v, str):
+            a_string = a_string.replace(k, v)
         else:
-            aString = aString.replace( k, repr( v ) )
-    return aString
+            a_string = a_string.replace(k, repr(v))
+    return a_string
 
 
-def convertThemeToFilename( theme ):
-    """Converts specified theme name into the full filename of its dedicated page."""
-    return os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-ROOT-PATH' ], themeDirectoryName, convertIntoFileName( theme ) + htmlExtension )
+def convert_theme_to_filename(theme):
+    """Converts specified theme name into the full filename of its dedicated
+page."""
+    return os.path.join(token_dic['YAG-OSDL-TOKEN-ROOT-PATH'], theme_directory_name, convert_into_filename(theme) + html_extension)
 
 
-def handleTheme( themeName, contentName, contentFileName ):
-    """Take care of specified theme: link it to others, records its elements."""
-    foundTheme = mainDic[ 'themes' ].searchContent( themeName )
+def handle_theme(theme_name, content_name, content_filename):
+    """
+    Takes care of specified theme: links it to others, records its elements.
+    """
+    found_theme = main_dic['themes'].search_content(theme_name)
     # Theme not found, create it at the root of the theme tree:
-    if not foundTheme:
-        foundTheme = NodeTheme( themeName )
-        mainDic[ 'themes' ].addChild( foundTheme )
-    # We've got to provide to addContent not the contentFileName but its page:
-    foundTheme.addContent( contentName, convertIntoFileName( contentFileName )
-                           + htmlExtension )
+    if not found_theme:
+        found_theme = NodeTheme(theme_name)
+        main_dic['themes'].add_child(found_theme)
+    # We've got to provide to add_content not the content_filename but its page:
+    found_theme.add_content(content_name, convert_into_filename(content_filename) + html_extension)
 
 
-def registerSimpleTheme( theme_name ):
+def register_simple_theme(theme_name):
     """Registers, if necessary, in theme tree specified theme."""
     # If already found in theme tree, nothing to do.
     # Otherwise, create it just under the tree root.
-    if not mainDic[ 'themes' ].searchContent( theme_name ):
-        mainDic[ 'themes' ].addChild( NodeTheme( theme_name ) )
+    if not main_dic['themes'].search_content(theme_name):
+        main_dic['themes'].add_child(NodeTheme(theme_name))
 
 
-def registerLinkedThemes( father_theme_name, son_theme_name ):
-        """
-        Registers, if necessary, in theme tree specified theme with its father.
-        """
-        # First, do so that father theme exists:
-        fatherTheme = mainDic[ 'themes' ].searchContent( father_theme_name )
-        if not fatherTheme:
-                # Father not existing? Create it at the root.
-                #print "Creating father theme %s at the root" % (father_theme_name,)
-                fatherTheme = NodeTheme( father_theme_name )
-                mainDic[ 'themes' ].addChild( fatherTheme )
-        # Here the father exists in all cases.
+def register_linked_themes(father_theme_name, son_theme_name):
+    """Registers, if necessary, in theme tree specified theme with its father.
+    """
+    # First, do so that father theme exists:
+    father_theme = main_dic['themes'].search_content(father_theme_name)
+    if not father_theme:
+        # Father not existing? Create it at the root.
+        #print("Creating father theme '%s' at the root." % (father_theme_name,))
+        father_theme = NodeTheme(father_theme_name)
+        main_dic['themes'].add_child(father_theme)
 
-        # Second, do so that son theme exists:
-        sonTheme = mainDic[ 'themes' ].searchContent( son_theme_name )
-        #print "sonTheme = %s" % (sonTheme,)
-        if not sonTheme:
-                #print "Creating non-already existing child theme %s and adding it to its father" % (son_theme_name,)
-                fatherTheme.addChild( NodeTheme( son_theme_name ) )
+    # Here the father exists in all cases.
+
+    # Second, do so that son theme exists:
+    son_theme = main_dic['themes'].search_content(son_theme_name)
+    #print("son_theme = %s" % (son_theme,))
+    if not son_theme:
+        #print("Creating non-already existing child theme '%s' and adding it to its father." % (son_theme_name,))
+        father_theme.add_child(NodeTheme(son_theme_name))
+    else:
+        #print("Child theme %s already existing." % (son_theme_name,))
+        if not father_theme.search_children(son_theme_name):
+            #output_device.debug("Relinking theme '%s' to be a son of theme '%s'." % (son_theme_name, father_theme_name))
+            # Here, a is to be b's father but b is currently not his child.
+            path = main_dic['themes'].search_path_to_content(son_theme_name)
+            previous_father = path[1]
+            #print("Adding node '%s' to node '%s'." % (son_theme, father_theme)
+            father_theme.add_child(son_theme)
+
+            #print("Cutting node '%s' from node '%s'." % (son_theme, previous_father))
+            #print("Removing '%s' from list '%s'." % (son_theme, previous_father.children))
+            previous_father.remove_child(son_theme)
+
+            #print("Cut list is '%s'." % (previous_father.children,)
+
+
+def update_theme_tree(themes_list):
+    """
+    Gets a list of theme lines and updates accordingly the theme tree.
+    """
+
+    for t in themes_list:
+        current_theme = None
+        parent_theme  = None
+        last = None
+
+        # Gets non-empty themes: 'ee: rr:: nn' -> ['ee', 'rr', 'nn']
+        themes_in_line = [e.strip() for e in t.split(':') if e.strip() != '']
+
+        #print("themes_in_line = '%s'." % (themes_in_line,))
+
+        if themes_in_line:
+            last = themes_in_line.pop()
+            register_simple_theme(last)
+
+        while themes_in_line:
+            newLast = themes_in_line.pop()
+            register_linked_themes(newLast, last)
+            last = newLast
+
+
+def handle_themes_for(graphic_filename, themes_list):
+    """
+    Returns a string made to be added in a graphics's full page in order
+    to link to spotted themes. Creates new themes if necessary.
+    """
+    direct_theme_dir = os.path.join(token_dic['YAG-OSDL-TOKEN-ROOT-PATH'], resource_directory_name)
+
+    # Put 'T' image:
+    if main_dic['language'] == 'French':
+        theme_text = u'<p><img src="' + os.path.join(direct_theme_dir, 'theme.png') + '" alt="[Themes]" width="16"></img> :<ul>'
+    else:
+        theme_text = '<p><img src="' + os.path.join(direct_theme_dir, 'theme.png') + '" alt="[Themes]" width="16"></img> This image belongs to the following themes:<ul>'
+
+    update_theme_tree(themes_list)
+
+    # Add bullet for each spotted theme:
+    for t in themes_list:
+        #print("handle_themes_for: managing theme '%s'." % (t,))
+        theme_text += '<li><a href="' + convert_theme_to_filename(t) + '">%s</a></li>\n' % (t,)
+        # Register content in this theme (with absolute content filename):
+        handle_theme(t, graphic_filename, os.path.join(token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY'], graphic_filename))
+
+    theme_text += '</ul></p>'
+
+    return theme_text
+
+
+
+def get_theme_html_subtree(node, offset=0, next_offset=0, is_first_child=True):
+    """
+    Returns a stringified description of the tree, in HTML format.
+
+    __ a __ b
+              |_ c __ d __ e
+                   |_ f
+              |_ g
+
+    offset is the current position where to write
+    next_offset is the position where children should begin
+    """
+    res = ""
+
+    # The two branches must have the same length:
+    #branch_first = 'x__x'
+    #branch_other = 'y|_y'
+    branch_first = '<ul><li>  '
+    branch_next = '</li><li> '
+    branch_last   = '</li></ul>'
+
+    if node.content != 'RootTheme':
+        internal_text = '<a href="' + convert_theme_to_filename(node.content) + '">' + node.content + '</a>'
+        # Useless:
+        #subthemes_count = len(node.children)
+        #if subthemes_count:
+        #    internal_text += '[%s]" % (subthemes_count,)
+
+        content_count = len(node.referenced_content)
+        if content_count:
+            internal_text += ' (%s)' % (content_count,)
+        this_text = internal_text
+    else:
+        if main_dic['language'] == 'French':
+            this_text = u'Thème racine'
         else:
-                #print "Child theme %s already existing" % (son_theme_name,)
-                if not fatherTheme.searchChildren( son_theme_name ):
-                        #outputDevice.debug( "Relinking theme '%s' to be a son of theme '%s'." % ( son_theme_name, father_theme_name ) )
-                        # Here, a is to be b's father but b is currently not his child.
-                        path = mainDic[ 'themes' ].searchPathToContent( son_theme_name )
-                        previous_father = path[1]
-                        #print 'Adding node <%s> to node <%s>' % ( sonTheme, fatherTheme )
-                        fatherTheme.addChild( sonTheme )
+            this_text = u'Root theme'
 
-                        #print 'Cutting node <%s> from node <%s>.' % ( sonTheme, previous_father)
-                        #print 'Removing <%s> from list <%s>' % ( sonTheme, previous_father.children )
-                        previous_father.removeChild( sonTheme )
+    node_text = string.ljust(this_text, next_offset - offset + 1)
 
-                        #print 'Cut list is <%s>' % (previous_father.children,)
+    if is_first_child:
+        res += branch_first + node_text
+    else:
+        #res = offset  * 'z' + branch_next + node_text
+        res = offset  * ' ' + branch_next + node_text
 
+    if node.children:
+        new_offset = offset + len(branch_first) + len(node_text)
 
-def updateThemeTree( themes_list ):
-        """
-        Gets a list of theme lines and updates accordingly the theme tree.
-        """
-
-        for t in themes_list:
-                current_theme = None
-                parent_theme  = None
-                last = None
-
-                # Gets non-empty themes: 'ee: rr:: nn' -> ['ee', 'rr', 'nn']
-                themes_in_line = [ e.strip() for e in t.split( ':' ) if e.strip() != '' ]
-
-                #print "themes_in_line = %s" % (themes_in_line,)
-
-                if len( themes_in_line ) != 0:
-                        last = themes_in_line.pop()
-                        registerSimpleTheme( last )
-
-                while len( themes_in_line ) > 0:
-                        newLast = themes_in_line.pop()
-                        registerLinkedThemes( newLast, last )
-                        last = newLast
-
-
-def handleThemesFor( graphicFileName, themes_list ):
-        """
-        Returns a string made to be added in a graphics's full page in order
-        to link to spotted themes. Creates new themes if necessary.
-        """
-        direct_theme_dir = os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-ROOT-PATH' ],
-                resourceDirectoryName )
-
-        # Put 'T' image:
-        if mainDic[ 'language' ] == 'French':
-            theme_text = u'<p><img src="' + os.path.join( direct_theme_dir, 'theme.png' ) + '" alt="[Themes]" width="16"></img> :<ul>'
-        else:
-            theme_text = '<p><img src="' + os.path.join( direct_theme_dir, 'theme.png' ) + '" alt="[Themes]" width="16"></img> This image belongs to the following themes:<ul>'
-
-        updateThemeTree( themes_list )
-
-        # Add bullet for each spotted theme:
-        for t in themes_list:
-                #print "handleThemesFor: managing theme '%s'" % (t,)
-                theme_text += '<li><a href="' + convertThemeToFilename( t ) + '">%s</a></li>\n' % ( t, )
-                # Register content in this theme (with absolute content filename):
-                handleTheme( t, graphicFileName, os.path.join( tokenDic [ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ], graphicFileName ) )
-        theme_text += '</ul></p>'
-
-        return theme_text
+        # Compute max child content total length:
+        extra_len = 0
+        for child in node.children:
+            child_size = len(child.content)
+            if child_size > extra_len:
+                extra_len = child_size
+        new_next_offset = offset + len(branch_first) + extra_len
+        res += get_theme_html_subtree(node.children[0], new_offset, new_next_offset, True)
+        for c in node.children[1:]:
+            res += '\n' + get_theme_html_subtree(c, new_offset, new_next_offset, False)
+        res += branch_last
+    return res
 
 
 
-def getThemeHTMLSubTree( node, offset = 0, nextOffset = 0, isFirstChild = True ):
-        """
-        Returns a stringified description of the tree, in HTML format.
-
-        __ a __ b
-                  |_ c __ d __ e
-                       |_ f
-                  |_ g
-
-        offset is the current position where to write
-        nextOffset is the position where children should begin
-        """
-        res= ""
-
-        # The two branches must have the same length:
-        #branchFirst = 'x__x'
-        #branchOther = 'y|_y'
-        branchFirst = '<ul><li>  '
-        branchOther = '</li><li> '
-        branchEnd   = '</li></ul>'
-
-        if node.content != 'RootTheme':
-                internal_text = '<a href="' + convertThemeToFilename( node.content ) + '">' + node.content + '</a>'
-                # Useless:
-                #subthemes_count = len( node.children )
-                #if subthemes_count:
-                #	internal_text += '[%s]' % ( subthemes_count,)
-
-                content_count = len( node.referencedContent )
-                if content_count:
-                        internal_text += ' (%s)' % ( content_count,)
-
-                node_text = string.ljust( internal_text, nextOffset - offset + 1 )
-        else:
-            if mainDic[ 'language' ] == 'French':
-                node_text = string.ljust( u'Thème racine', nextOffset - offset + 1 )
-            else:
-                node_text = string.ljust( u'Root theme', nextOffset - offset + 1 )
-
-        if isFirstChild:
-                res += branchFirst + node_text
-        else:
-                #res =  offset  * 'z' + branchOther + node_text
-                res =  offset  * ' ' + branchOther + node_text
-
-        if len( node.children ):
-                newOffset = offset + len( branchFirst ) + len( node_text )
-
-                # Compute max child content total length:
-                extraLength = 0
-                for child in node.children:
-                        child_size = len( child.content )
-                        if child_size > extraLength:
-                                extraLength = child_size
-                newNextOffset = offset + len( branchFirst ) + extraLength
-                res += getThemeHTMLSubTree( node.children[0], newOffset, newNextOffset, True )
-                for c in node.children[1:]:
-                        res += '\n' + getThemeHTMLSubTree( c, newOffset, newNextOffset, False )
-                res += branchEnd
-        return res
-
-
-
-def generateThemeMainPage():
+def generate_theme_main_page():
     """Generates the theme main page, i.e. the theme tree portal."""
 
-    #outputDevice.debug( 'Showing HTML theme tree:\n%s' % ( getThemeHTMLSubTree( mainDic[ 'themes' ] ), ) )
-    main_theme_file = file( os.path.join( mainDic[ 'template_directory' ], 'MainPageTheme.template.html' ), 'r' )
-    content = main_theme_file.read().decode( encoding )
-    tokenDic[ 'YAG-OSDL-THEME-TREE' ] = getThemeHTMLSubTree( mainDic[ 'themes' ] )
-    content = updateFromTokenDic( content )
-    file( os.path.join( mainDic[ 'output_directory' ], yag_general_theme_page ), 'w' ).write( content.encode( encoding ) )
+    #output_device.debug("Showing HTML theme tree:\n%s" % (get_theme_html_subtree(main_dic['themes']),))
+    main_theme_path = os.path.join(main_dic['template_directory'], 'MainPageTheme.template.html'), 'r'
+    with open(main_theme_path, 'r', encoding=yag_encoding) as f:
+        content = f.read()
+    token_dic['YAG-OSDL-THEME-TREE'] = get_theme_html_subtree(main_dic['themes'])
+    content = update_from_token_dic(content)
+    gen_theme_path = os.path.join(main_dic['output_directory'], yag_general_theme_page)
+    with open(gen_theme_path, 'r', encoding=yag_encoding) as f:
+        f.write(content)
 
 
 
-def generateFirstThemeMenu():
-        """
-        Generates alternate first menu, which displays theme map instead of
-        first gallery comment.
-        """
-        first_original_menu = getMenuFilenameFromDir( mainDic[ 'output_directory' ] )
+def generate_first_theme_menu():
+    """
+    Generates alternate first menu, which displays theme map instead of
+    first gallery comment.
+    """
+    first_original_menu = get_menu_path_from_dir(main_dic['output_directory'])
 
-        content = file( first_original_menu, 'r' ).read().decode( encoding )
-        new_content = content.replace( 'Overview-0.html', yag_general_theme_page )
+    with open(first_original_menu, 'r', encoding=yag_encoding) as f:
+        content = f.read()
+    new_content = content.replace('Overview-0.html', yag_general_theme_page)
 
-        theme_menu_filename = os.path.join( mainDic[ 'output_directory' ], os.path.basename( mainDic[ 'output_directory' ] ) + 'Menu-theme' + htmlExtension )
+    theme_menu_path = os.path.join(main_dic['output_directory'], os.path.basename(main_dic['output_directory']) + 'Menu-theme' + html_extension)
 
-        theme_menu_file = file( theme_menu_filename, 'w' )
-
-        theme_menu_file.write( new_content.encode( encoding ) )
-
-
-
-def generateThemePages():
-        """Generates each theme page and links them together."""
-        outputDevice.info( 'Generating theme pages' )
-
-        themeDir = os.path.join( mainDic[ 'output_directory' ], themeDirectoryName )
-        if not os.path.exists( themeDir ):
-                os.mkdir( themeDir )
-
-        tokenDic[ 'YAG-OSDL-TOKEN-ROOT-PATH' ] = ".."
-
-        theme_list = mainDic[ 'themes' ].listDepthFirst()
-        for theme in theme_list:
-                generateThemePage( theme )
-
-        tokenDic[ 'YAG-OSDL-TOKEN-ROOT-PATH' ] = "."
-
-        generateThemeMainPage()
-
-        generateFirstThemeMenu()
-
-
-def generateThemePage( theme ):
-        """ Generates page for specified theme."""
-        #outputDevice.info( 'Generating page for theme <%s>.' % ( theme.getName(), ) )
-        template_dir = mainDic[ 'template_directory' ]
-        header_theme_file = file( os.path.join( template_dir, 'HeaderTheme.template.html' ), 'r' )
-        footer_theme_file = file( os.path.join( template_dir, 'FooterTheme.template.html' ), 'r' )
-
-        content = header_theme_file.read().decode( encoding )
-
-        # List referenced content:
-        content += theme.generateHTMLReferencedContent()
-
-        # List subthemes:
-        content += theme.generateHTMLSubThemes()
-
-        content += footer_theme_file.read().decode( encoding )
-
-        tokenDic[ 'YAG-OSDL-CURRENT-THEME' ] = theme.getName()
-        content = updateFromTokenDic( content )
-
-        file( os.path.join( mainDic[ 'output_directory' ], themeDirectoryName, convertIntoFileName( theme.getName() ) + htmlExtension ), 'w' ).write( content.encode( encoding ) )
+    with open(theme_menu_path, 'w', encoding=yag_encoding) as f:
+        f.write(new_content)
 
 
 
-def preloadThemes():
-        """Preloads a standalone theme file defining the main theme inheritances."""
-        standalone_theme_file = os.path.join( mainDic[ 'content_directory' ], yag_general_theme_file )
-        if os.path.exists( standalone_theme_file ):
-                outputDevice.info( 'Using standalone theme file <%s>.' % ( standalone_theme_file, ) )
-                themes_with_eof = file( standalone_theme_file, 'r' ).readlines()
-                decoded_themes = [ th.decode( encoding ) for th in themes_with_eof ]
-                themes = []
-                for t in decoded_themes:
-                        themes.append( t[:-1].strip() )
-                updateThemeTree( themes )
-        else:
-                outputDevice.debug( 'No standalone theme file (<%s>) found.' % ( standalone_theme_file, ) )
+def generate_theme_pages():
+    """Generates each theme page and links them together."""
+    output_device.info('Generating theme pages')
+
+    theme_dir = os.path.join(main_dic['output_directory'], theme_directory_name)
+    if not os.path.exists(theme_dir):
+        os.mkdir(theme_dir)
+
+    token_dic['YAG-OSDL-TOKEN-ROOT-PATH'] = ".."
+
+    theme_list = main_dic['themes'].list_depth_first()
+    for theme in theme_list:
+        generate_theme_pages(theme)
+
+    token_dic['YAG-OSDL-TOKEN-ROOT-PATH'] = "."
+
+    generate_theme_main_page()
+
+    generate_first_theme_menu()
 
 
-def showThemes():
+def generate_theme_pages(theme):
+    """ Generates page for specified theme."""
+    #output_device.info('Generating page for theme '%s'." % (theme.get_name(),))
+    template_dir = main_dic['template_directory']
+
+    header_theme_path = os.path.join(template_dir, 'HeaderTheme.template.html')
+    with open(header_theme_path, 'r', encoding=yag_encoding) as f:
+        content = f.read()
+
+    # List referenced content:
+    content += theme.generate_html_referenced_content()
+
+    # List subthemes:
+    content += theme.generate_html_sub_themes()
+
+    footer_theme_path = os.path.join(template_dir, 'FooterTheme.template.html')
+
+    with open(footer_theme_path, 'r', encoding=yag_encoding) as f:
+        content = f.read()
+
+    token_dic['YAG-OSDL-CURRENT-THEME'] = theme.get_name()
+    content = update_from_token_dic(content)
+
+    gen_theme_path = os.path.join(main_dic['output_directory'], theme_directory_name, convert_into_filename(theme.get_name()) + html_extension)
+
+    with open(gen_theme_path, 'r', encoding=yag_encoding) as f:
+        f.write(content)
+
+
+
+def preload_themes():
+    """Preloads a standalone theme file defining the main theme
+    inheritances."""
+
+    standalone_theme_path = os.path.join(main_dic['content_directory'], yag_general_theme_file)
+    if os.path.exists(standalone_theme_path):
+        output_device.info("Using standalone theme file '%s'." % (standalone_theme_path,))
+        themes_with_eof = []
+        with open(standalone_theme_path, 'r', encoding=yag_encoding) as f:
+            themes_with_eof = f.readlines()
+        decoded_themes = [th for th in themes_with_eof]
+        themes = []
+        for t in decoded_themes:
+            themes.append(t[:-1].strip())
+        update_theme_tree(themes)
+    else:
+        output_device.debug("No standalone theme file ('%s') found." % (standalone_theme_path,))
+
+
+def show_themes():
     """Prints the theme tree."""
-    print( "Theme tree is:\n%s" % ( mainDic[ 'themes' ].toString(),) )
+    print("Theme tree is:\n%s" % (main_dic['themes'].to_string(),))
 
 
-def getLeafThemesFrom( themes ):
+def get_leaf_themes_from(themes):
     """
     Returns a list whose elements are the child themes of specified list, which
     may include elements such as 'a: b': for them we need 'b' to be returned.
     """
-    res=[]
+    res = []
     for t in themes:
         # Appends last theme:
-        res.append( [ e.strip() for e in t.split( ':' ) if e.strip() != '' ].pop() )
+        res.append([e.strip() for e in t.split(':') if e.strip() != ''].pop())
     return res
 
 
-def generateFullPageForGraphic( previousFileName, graphicFileName, nextFileName, overview_count ):
-        """Generates the specified graphic's full web page."""
+def generate_full_page_for_graphic(prev_filename, graphic_filename, next_filename, overview_count):
+    """Generates the specified graphic's full web page."""
 
-        #outputDevice.info( 'Generating a full web page for graphic file <%s>.' % ( graphicFileName, ) )
-        graphFile = file( getFullPageFilenameFromGraphic( graphicFileName ), 'w+' )
-        template_dir = mainDic[ 'template_directory' ]
-        #outputDevice.debug( 'Using <%s> as template directory.' % ( template_dir, ) )
+    #output_device.info("Generating a full web page for graphic file '%s'." % (graphic_filename,))
+    template_dir = main_dic['template_directory']
+    #output_device.debug("Using '%s' as template directory." % (template_dir,))
 
-        header_page_file = file( os.path.join( template_dir, 'HeaderImage.template.html' ), 'r' )
-        footer_page_file = file( os.path.join( template_dir, 'FooterImage.template.html' ), 'r' )
+    header_page_path = os.path.join(template_dir, 'HeaderImage.template.html')
+    with open(header_page_path, 'r', encoding=yag_encoding) as f:
+        content = f.read()
 
-        content = header_page_file.read().decode( encoding )
+    direct_theme_dir = os.path.join(token_dic['YAG-OSDL-TOKEN-ROOT-PATH'], resource_directory_name)
 
-        direct_theme_dir = os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-ROOT-PATH' ], resourceDirectoryName )
+    # Manage comments:
+    comment_path = os.path.join(token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY'], convert_into_filename(graphic_filename) + comment_extension)
+    if os.path.isfile(comment_path):
+        #output_device.info("Using comment file '%s'." % (comment_path,))
+        with open(comment_path, 'r', encoding=yag_encoding) as f:
+            comment = f.read()
+        if comment.strip():
+            content += '<br><br><p><img src="' + os.path.join(direct_theme_dir, 'comment.png') + '" alt="[Comment]" width="16"></img> ' + comment + '</p><br><br>'
+    else:
+        #output_device.debug("No comment file found (tried '%s')." % (comment_path,))
+        pass
 
-        # Manage comments:
-        comment_file = os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ], convertIntoFileName( graphicFileName ) + commentExtension )
-        if os.path.isfile( comment_file ):
-                #outputDevice.info( 'Using comment file <%s>.' % ( comment_file, ) )
-                comment = file( comment_file ).read().decode( encoding )
-                if len( comment.strip() ):
-                        content += '<br><br><p><img src="' + os.path.join( direct_theme_dir, 'comment.png' ) + '" alt="[Comment]" width="16"></img> ' + comment + '</p><br><br>'
-        else:
-                #outputDevice.debug( 'No comment file found (tried <%s>).' % ( comment_file, ) )
-                pass
+    # Manage theme:
+    theme_path = os.path.join(token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY'], convert_into_filename(graphic_filename) + theme_extension)
 
-        # Manage theme:
-        theme_file = os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ],
-                convertIntoFileName( graphicFileName ) + themeExtension )
+    if os.path.isfile(theme_path):
+        #output_device.info("Using theme file '%s'." % (theme_path,))
+        with open(theme_path, 'r', encoding=yag_encoding) as f:
+            themes_with_eof = f.readlines()
+        decoded_themes= [th for th in themes_with_eof]
+        themes = []
+        for t in decoded_themes:
+            themes.append(t[:-1].strip())
+        update_theme_tree(themes)
 
-        if os.path.isfile( theme_file ):
-                #outputDevice.info( 'Using theme file <%s>.' % ( theme_file, ) )
-                themes_with_eof = file( theme_file ).readlines()
-                decoded_themes= [ th.decode( encoding ) for th in themes_with_eof ]
-                themes = []
-                for t in decoded_themes:
-                        themes.append( t[:-1].strip() )
-                updateThemeTree( themes )
+        # In the theme file of this image, there may be sub-themes declared as
+        # 'a: b'. It means that this image actually belong to child theme b:
+        #
+        leaf_themes = get_leaf_themes_from(themes)
+        if leaf_themes:
+            content += handle_themes_for(graphic_filename, leaf_themes)
+    else:
+        #output_device.debug("No theme file found (tried '%s')." % (theme_file,))
+        pass
 
-                # In the theme file of this image, there may be sub-themes declared
-                # as 'a: b'. It means that this image actually belong to child theme b:
-                leaf_themes = getLeafThemesFrom( themes )
-                if len( leaf_themes ):
-                        content += handleThemesFor( graphicFileName, leaf_themes )
-        else:
-                #outputDevice.debug( 'No theme file found (tried <%s>).' % ( theme_file, ) )
-                pass
+    content += '<p><center>'
 
-        content += '<p><center>'
+    if prev_filename:
+        content += '<a href="' + os.path.basename(get_full_page_filename_from_graphic(prev_filename)) + '"><img src="' + os.path.join(token_dic['YAG-OSDL-TOKEN-ROOT-PATH'], resource_directory_name, 'previous.png') + '" border="0" alt="[Previous]"></img></a> '
 
-        if previousFileName:
-                content += '<a href="' + os.path.basename( getFullPageFilenameFromGraphic( previousFileName ) ) + '"><img src="' + os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-ROOT-PATH' ], resourceDirectoryName, 'previous.png' ) + '" border="0" alt="[Previous]"></img></a> '
+    content += ' <a href="Overview-' + repr(overview_count) + '.html' + '"><img src="' + os.path.join(token_dic['YAG-OSDL-TOKEN-ROOT-PATH'], resource_directory_name, 'up.png') + '" border="0" alt="[Up]"></img></a> '
 
-        content += ' <a href="Overview-' + repr(overview_count) + '.html' + '"><img src="' + os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-ROOT-PATH' ], resourceDirectoryName, 'up.png' ) + '" border="0" alt="[Up]"></img></a> '
+    if next_filename:
+        content += ' <a href="' + os.path.basename(get_full_page_filename_from_graphic(next_filename)) + '"><img src="' + os.path.join(token_dic['YAG-OSDL-TOKEN-ROOT-PATH'], resource_directory_name, 'next.png') + '" border="0" alt="[Next]"></img></a> '
 
-        if nextFileName:
-                content += ' <a href="' + os.path.basename( getFullPageFilenameFromGraphic( nextFileName ) ) + '"><img src="' + os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-ROOT-PATH' ], resourceDirectoryName, 'next.png' ) + '" border="0" alt="[Next]"></img></a> '
+    content += "</center></p><br><br>"
 
+    footer_page_path = os.path.join(template_dir, 'FooterImage.template.html')
 
-        content += "</center></p><br><br>"
+    with open(footer_page_path, 'r', encoding=yag_encoding) as f:
+        content += f.read()
 
-        content += footer_page_file.read().decode( encoding )
-        tokenDic[ 'YAG-OSDL-CURRENT-CONTENT-TXT' ] = graphicFileName
-        tokenDic[ 'YAG-OSDL-CURRENT-CONTENT-RAW' ] = graphicFileName
+    token_dic['YAG-OSDL-CURRENT-CONTENT-TXT'] = graphic_filename
+    token_dic['YAG-OSDL-CURRENT-CONTENT-RAW'] = graphic_filename
 
-        content = updateFromTokenDic( content )
+    content = update_from_token_dic(content)
 
-        graphFile.write( content.encode( encoding ) )
-        graphFile.close()
+    with open(get_full_page_filename_from_graphic(graphic_filename), 'w+', encoding=yag_encoding) as f:
+        f.write(content)
 
 
 
-def getMenuFilenameFromDir( directoryName ):
+def get_menu_path_from_dir(directory_name):
     """Returns menu filename corresponding to provided directory."""
 
     # Translating content path to output one:
-    #content_base = tokenDic[ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ]
-    #output_path = tokenDic[ 'YAG-OSDL-TOKEN-OUTPUT-DIRECTORY' ]
-    #base_path = directoryName.replace( content_base, output_path, 1 )
-    #menu_path = os.path.join( base_path, os.path.basename( directoryName ) + 'Menu' + htmlExtension )
-    menu_path = os.path.join( directoryName, os.path.basename( directoryName ) + 'Menu' + htmlExtension )
-    #print( 'getMenuFilenameFromDir: got <%s>, returned <%s>.' % ( directoryName, menu_path ) )
+    #content_base = token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY']
+    #output_path = token_dic['YAG-OSDL-TOKEN-OUTPUT-DIRECTORY']
+    #base_path = directory_name.replace(content_base, output_path, 1)
+    #menu_path = os.path.join(base_path, os.path.basename(directory_name) + 'Menu' + html_extension)
+    menu_path = os.path.join(directory_name, os.path.basename(directory_name) + 'Menu' + html_extension)
+    #print("get_menu_path_from_dir: got '%s', returned '%s'." % (directory_name, menu_path))
     return menu_path
 
 
 
-def handleMenuName( menuName ):
+def handle_menu_name(menu_name):
     """
     Modifies, if requested, menu name according to settings.
     Ex: dash_is_space_in_menu is handled.
     """
-    if mainDic[ 'dash_is_space_in_menu' ] == 'False':
-        return menuName
+    if not main_dic['dash_is_space_in_menu']:
+        return menu_name
     else:
-        return menuName.replace( '-', ' ' )
+        return menu_name.replace('-', ' ')
 
 
-def generateMenuForDirectory( rootLevel ):
-        """Generates menu frame file for a directory."""
+def generate_menu_for_dir(root_level):
+    """Generates menu frame file for a directory."""
 
-        directories_list, files_list = getDirectoryElements( tokenDic[ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ] )
+    directories, files = get_dir_elements(token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY'])
 
-        target_dir = tokenDic[ 'YAG-OSDL-TOKEN-OUTPUT-DIRECTORY' ]
-        menu_filename = getMenuFilenameFromDir( target_dir )
+    target_dir = token_dic['YAG-OSDL-TOKEN-OUTPUT-DIRECTORY']
+    menu_path = get_menu_path_from_dir(target_dir)
 
-        if not os.path.exists( target_dir ):
-            os.mkdir( target_dir )
+    if not os.path.exists(target_dir):
+        os.mkdir(target_dir)
 
-        outputDevice.debug( "Creating menu file <%s>." % ( menu_filename, ) )
+    output_device.debug("Creating menu file '%s'." % (menu_path,))
 
-        template_dir = mainDic[ 'template_directory' ]
-        #outputDevice.debug( 'Using <%s> as template directory.' % ( template_dir, ) )
+    template_dir = main_dic['template_directory']
+    #output_device.debug("Using '%s' as template directory." % (template_dir,))
 
-        # Avoids a back button leading to nowhere:
+    # Avoids a back button leading to nowhere:
 
-        default_menu_name = handleMenuName( os.path.basename( tokenDic[ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ] ) )
+    default_menu_path = handle_menu_name(os.path.basename(token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY']))
 
-        if rootLevel:
-                header_menu_file = file( os.path.join( template_dir, 'HeaderFirstMenu.template.html' ), 'r' )
-                if mainDic[ 'output_in_content' ] == 'True':
-                    tokenDic[ 'YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY' ] = default_menu_name
-                else:
-                    tokenDic[ 'YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY' ] = os.path.basename( mainDic[ 'output_directory' ] )
+    if root_level:
+        header_menu_path = os.path.join(template_dir, 'HeaderFirstMenu.template.html')
+        if main_dic['output_in_content']:
+            token_dic['YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY'] = default_menu_path
         else:
-                header_menu_file = file( os.path.join( template_dir, 'HeaderMenu.template.html' ), 'r' )
-                tokenDic[ 'YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY' ] = default_menu_name
+            token_dic['YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY'] = os.path.basename(main_dic['output_directory'])
+    else:
+        header_menu_path = os.path.join(template_dir, 'HeaderMenu.template.html')
+        token_dic['YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY'] = default_menu_path
 
-        footer_menu_file = file( os.path.join( template_dir, 'FooterMenu.template.html' ), 'r' )
+    with open(header_menu_path, 'r', encoding=yag_encoding) as f:
+        header_menu_content = f.read()
 
-        menuFile = file( menu_filename, 'w' )
+    footer_menu_path = os.path.join(template_dir, 'FooterMenu.template.html')
 
-        menuFile.write( updateFromTokenDic( header_menu_file.read().decode( encoding ) ).encode( encoding ) )
+    with open(header_menu_path, 'r', encoding=yag_encoding) as f:
+        footer_menu_content = f.read()
+
+    with open(menu_path, 'w', encoding=yag_encoding) as f:
+        f.write(update_from_token_dic(header_menu_content))
 
         text_one = '<tr>\n<td align="right"><a href="'
-        text_two = updateFromTokenDic( '" onclick="parent.mainFrame.location=&#39;YAG-OSDL-TOKEN-ROOT-PATH/yag-osdl-resources/black.html&#39;">' )
+        text_two = update_from_token_dic('" onclick="parent.mainFrame.location=&#39;YAG-OSDL-TOKEN-ROOT-PATH/yag-osdl-resources/black.html&#39;">')
 
         text_three= '</a></td>\n<td width="15"><a href="'
 
-        text_four = updateFromTokenDic( '"<img src="YAG-OSDL-TOKEN-ROOT-PATH/yag-osdl-resources/Arrow.png" border="0" alt=""></a></td>\n</tr>\n' )
+        text_four = update_from_token_dic('"<img src="YAG-OSDL-TOKEN-ROOT-PATH/yag-osdl-resources/Arrow.png" border="0" alt=""></a></td>\n</tr>\n')
 
-        for d in directories_list:
-                if d not in [ resourceDirectoryName, themeDirectoryName ]:
-                        to_write = text_one + d + '/' + d + 'Menu.html' + text_two + handleMenuName( d ) + text_three + d + '/' + d + 'Menu.html' + text_four
-                        menuFile.write( to_write.encode( encoding )  )
+        for d in directories:
+            if d not in [resource_directory_name, theme_directory_name]:
+                to_write = text_one + d + '/' + d + 'Menu.html' + text_two + handle_menu_name(d) + text_three + d + '/' + d + 'Menu.html' + text_four
+                f.write(to_write )
 
-        menuFile.write( updateFromTokenDic( footer_menu_file.read().decode( encoding ) ).encode( encoding ) )
-
-        menuFile.close()
+        f.write(update_from_token_dic(footer_menu_content))
 
 
 
-def generateOverview( graphics, pageCount, totalPageCount, comment, rootLevel ):
-        """Generates content overview for current directory."""
+def generate_overview(graphics, page_count, total_page_count, comment, root_level):
+    """Generates content overview for current directory."""
 
-        overview_file = file( os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-OUTPUT-DIRECTORY' ], 'Overview-' + repr(pageCount) + htmlExtension ), 'w' )
+    images_per_overview = int(main_dic['images_by_column']) * int(main_dic['images_by_row'])
 
-        images_per_overview = int( mainDic[ 'images_by_column' ] ) * int( mainDic[ 'images_by_row' ] )
+    if len(graphics) > images_per_overview:
+        managed   = graphics[:images_per_overview]
+        remainder = graphics[images_per_overview:]
+    else:
+        managed = graphics
+        remainder = []
 
-        if len( graphics ) > images_per_overview:
-            managed   = graphics[:images_per_overview]
-            remainder = graphics[images_per_overview:]
-        else:
-            managed = graphics
-            remainder = []
+    template_dir = main_dic['template_directory']
 
-        template_dir = mainDic[ 'template_directory' ]
+    #print("###### managed = %s" % (managed,))
 
-        #print( "###### managed = %s" % (managed,))
+    header_page_path = os.path.join(template_dir, 'HeaderGallery.template.html')
+    with open(header_page_path, 'r', encoding=yag_encoding) as f:
+        header_content = f.read()
 
-        header_page_file = file( os.path.join( template_dir, 'HeaderGallery.template.html' ), 'r' )
-        footer_page_file = file( os.path.join( template_dir, 'FooterGallery.template.html' ), 'r' )
+    footer_page_path = os.path.join(template_dir, 'FooterGallery.template.html')
+    with open(footer_page_path, 'r', encoding=yag_encoding) as f:
+        footer_content = f.read()
 
-        overview_file.write( updateFromTokenDic( header_page_file.read().decode( encoding ) ).encode( encoding ) )
+    overview_path = os.path.join(token_dic['YAG-OSDL-TOKEN-OUTPUT-DIRECTORY'], 'Overview-' + repr(page_count) + html_extension)
 
-        if rootLevel:
-            if mainDic[ 'language' ] == 'French':
-                overview_file.write( u'<p>Sélectionner dans le menu de gauche le mode de navigation que vous préférez, ou toute galerie que vous souhaitez consulter.</p>'.encode( encoding ) )
+    with open(overview_path, 'w', encoding=yag_encoding) as f:
+        f.write(update_from_token_dic(header_content))
+
+        if root_level:
+            if main_dic['language'] == 'French':
+                f.write(u'<p>Sélectionner dans le menu de gauche le mode de navigation que vous préférez, ou toute galerie que vous souhaitez consulter.</p>')
             else:
-                overview_file.write( u'<p>Select in the left panel your preferred browsing scheme and any gallery you want to display.</p>'.encode( encoding ) )
+                f.write(u'<p>Select in the left panel your preferred browsing scheme and any gallery you want to display.</p>')
 
-        if not len( managed ):
-            overview_file.write( updateFromTokenDic( footer_page_file.read().decode( encoding ) ).encode( encoding ) )
+        if not managed:
+            f.write(update_from_token_dic(footer_content))
             return
 
         # Computes the number of sub-galleries:
-        if not totalPageCount:
-            totalPageCount = len( graphics ) / images_per_overview
-            if len( graphics ) % images_per_overview:
-                totalPageCount += 1
+        if not total_page_count:
+            total_page_count = len(graphics) / images_per_overview
+        if len(graphics) % images_per_overview:
+            total_page_count += 1
 
         if comment:
-            to_write = '<br><br><p><img src="' + os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-ROOT-PATH' ], resourceDirectoryName, 'comment.png' ) + '" width="16" alt="[C]"></img> ' + comment + '</p><br><br>'
-            overview_file.write( to_write.encode( encoding ) )
+            to_write = '<br><br><p><img src="' + os.path.join(token_dic['YAG-OSDL-TOKEN-ROOT-PATH'], resource_directory_name, 'comment.png') + '" width="16" alt="[C]"></img> ' + comment + '</p><br><br>'
+            f.write(to_write)
 
-        if totalPageCount > 1:
-            overview_file.write( ( 'Sub-gallery %s out of %s for gallery %s<br><br> ' % ( pageCount + 1, totalPageCount, tokenDic[ 'YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY' ] ) ).encode( encoding ) )
+        if total_page_count > 1:
+            f.write(("Sub-gallery %s out of %s for gallery %s<br><br> " % (page_count + 1, total_page_count, token_dic['YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY'])))
         # Not useful enough?
         #else:
-        #    overview_file.write( ( ( '(Gallery %s has no sub-gallery)<br><br> ' % ( tokenDic[ 'YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY' ], ) ) ).encode( encoding ) )
+        #   f.write((('(Gallery %s has no sub-gallery)<br><br> " % (token_dic['YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY'],))))
 
-
-        if pageCount:
-            if pageCount == 1:
-                if mainDic[ 'language' ] == 'French':
-                    overview_file.write( u'[<a href="Overview.html">Première sous-galerie</a>]'.encode( encoding ) )
+        if page_count:
+            if page_count == 1:
+                if main_dic['language'] == 'French':
+                    f.write(u'[<a href="Overview.html">Première sous-galerie</a>]')
                 else:
-                    overview_file.write( '[<a href="Overview.html">First sub-gallery</a>]'.encode( encoding ) )
+                    f.write('[<a href="Overview.html">First sub-gallery</a>]')
             else:
-               if mainDic[ 'language' ] == 'French':
-                   overview_file.write( ( u'[<a href="Overview-' + repr(pageCount-1) + '.html">Sous-galerie précédente</a>]' ).encode( encoding ) )
+               if main_dic['language'] == 'French':
+                   f.write((u'[<a href="Overview-' + repr(page_count-1) + '.html">Sous-galerie précédente</a>]'))
                else:
-                   overview_file.write( ( '[<a href="Overview-' + repr(pageCount-1) + '.html">Previous sub-gallery</a>]' ).encode( encoding ) )
+                   f.write(('[<a href="Overview-' + repr(page_count-1) + '.html">Previous sub-gallery</a>]'))
 
-        if len( remainder ):
-            if pageCount +2 == totalPageCount:
-              if mainDic[ 'language' ] == 'French':
-                   overview_file.write( ( u'[<a href="Overview-' + repr(pageCount+1) + '.html">Dernière sous-galerie</a>]' ).encode( encoding ) )
-              else:
-                   overview_file.write( ( u'[<a href="Overview-' + repr(pageCount+1) + '.html">Last sub-gallery</a>]' ).encode( encoding ) )
-
+        if remainder:
+            if page_count+2 == total_page_count:
+                if main_dic['language'] == 'French':
+                    f.write((u'[<a href="Overview-' + repr(page_count+1) + '.html">Dernière sous-galerie</a>]'))
+                else:
+                    f.write((u'[<a href="Overview-' + repr(page_count+1) + '.html">Last sub-gallery</a>]'))
             else:
-              if mainDic[ 'language' ] == 'French':
-                   overview_file.write( ( u'[<a href="Overview-' + repr(pageCount+1) + '.html">Sous-galerie suivante</a>]' ).encode( encoding ) )
-              else:
-                   overview_file.write( ( '[<a href="Overview-' + repr(pageCount+1) + '.html">Next sub-gallery</a>]' ).encode( encoding ) )
+                if main_dic['language'] == 'French':
+                    f.write((u'[<a href="Overview-' + repr(page_count+1) + '.html">Sous-galerie suivante</a>]'))
+                else:
+                    f.write(('[<a href="Overview-' + repr(page_count+1) + '.html">Next sub-gallery</a>]'))
 
-        if mainDic[ 'language' ] == 'French':
-            overview_file.write( updateFromTokenDic( u'<br><br><table border="1" summary="Vignettes pour YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY"><caption>Vignettes pour la galerie YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY, cliquer pour agrandir</caption>' ).encode( encoding ) )
+        if main_dic['language'] == 'French':
+            f.write(update_from_token_dic(u'<br><br><table border="1" summary="Vignettes pour YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY"><caption>Vignettes pour la galerie YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY, cliquer pour agrandir</caption>'))
         else:
-            overview_file.write( updateFromTokenDic( '<br><br><table border="1" summary="Thumbnails for YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY"><caption>Thumbnails for gallery YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY, click to enlarge</caption>' ).encode( encoding ) )
+            f.write(update_from_token_dic('<br><br><table border="1" summary="Thumbnails for YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY"><caption>Thumbnails for gallery YAG-OSDL-TOKEN-SHORT-CONTENT-DIRECTORY, click to enlarge</caption>'))
 
         for g in managed:
-            full_path = os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ], g )
-            size = int( mainDic[ 'thumbsize' ] )
-            generateThumbnail( full_path, ( size, size ) )
+            full_path = os.path.join(token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY'], g)
+            size = int(main_dic['thumbsize'])
+            generate_thumbnail(full_path, (size, size))
 
         # Clone the list:
         graphics_to_pop = managed[:]
         graphics_to_pop.reverse()
 
-        if len( graphics_to_pop ):
-            for y in range( int( mainDic[ 'images_by_column' ] ) ):
-                overview_file.write( '<tr>\n'.encode( encoding ) )
-                for x in range( int( mainDic[ 'images_by_row' ] ) ):
-                    if len( graphics_to_pop ):
-                        imgFileName = graphics_to_pop.pop()
-                        to_write = '<td><center><a href="' + os.path.basename( getFullPageFilenameFromGraphic( imgFileName ) ) + '"><img src="' + os.path.splitext( imgFileName )[0] + '-thumbnail.jpeg" alt="Thumbnail for image ' + imgFileName + ' not available"></img><br>'
-                        overview_file.write( to_write.encode( encoding ) )
+        if graphics_to_pop:
+            for y in range( int(main_dic['images_by_column']) ):
+                f.write('<tr>\n')
+                for x in range( int(main_dic['images_by_row']) ):
+                    if graphics_to_pop:
+                        img_filename = graphics_to_pop.pop()
+                        to_write = '<td><center><a href="' + os.path.basename(get_full_page_filename_from_graphic(img_filename)) + '"><img src="' + os.path.splitext(img_filename)[0] + '-thumbnail.jpeg" alt="Thumbnail for image ' + img_filename + ' not available"></img><br>'
+                        f.write( to_write )
 
-                        comment_filename = os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ], convertIntoFileName( imgFileName ) + commentExtension )
-                        if os.path.isfile( comment_filename ):
-                            comment = file( comment_filename ).read().decode( encoding )
-                            if len( comment.strip() ):
-                                to_write = '<img src="' + os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-ROOT-PATH' ], resourceDirectoryName, 'comment.png' ) + '" width="16" alt="[C]"></img> '
-                                overview_file.write( to_write.encode( encoding ) )
+                        comment_filepath = os.path.join(token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY'], convert_into_filename(img_filename) + comment_extension)
+                        if os.path.isfile(comment_filepath):
+                            with open(comment_filepath, 'r', encoding=yag_encoding) as f:
+                                comment = f.read()
+                            if comment.strip():
+                                to_write = '<img src="' + os.path.join(token_dic['YAG-OSDL-TOKEN-ROOT-PATH'], resource_directory_name, 'comment.png') + '" width="16" alt="[C]"></img> '
+                                f.write(to_write)
 
-                        if os.path.isfile( os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ], convertIntoFileName( imgFileName ) + themeExtension ) ):
-                            to_write = '<img src="' + os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-ROOT-PATH' ], resourceDirectoryName, 'theme.png' ) + '" width="16" alt="[T]"></img>'
-                            overview_file.write( to_write.encode( encoding ) )
+                        thm_filepath = os.path.join(token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY'], convert_into_filename(img_filename) + theme_extension)
+                        if os.path.isfile(thm_filepath):
+                            to_write = '<img src="' + os.path.join(token_dic['YAG-OSDL-TOKEN-ROOT-PATH'], resource_directory_name, 'theme.png') + '" width="16" alt="[T]"></img>'
+                            f.write(to_write)
 
-                        overview_file.write( '</a></center></td>\n'.encode( encoding ) )
-
+                        f.write('</a></center></td>\n')
                     else:
                         break
-                overview_file.write( '</tr>\n'.encode( encoding ) )
-                if not len( graphics_to_pop ):
+                f.write('</tr>\n')
+                if not graphics_to_pop:
                     break
 
-            if mainDic[ 'language' ] == 'French':
-                overview_file.write( '</table></center></p><br><br><p><b>Navigation rapide selon les noms</b> :<br><br><ul>'.encode( encoding ) )
+            if main_dic['language'] == 'French':
+                f.write('</table></center></p><br><br><p><b>Navigation rapide selon les noms</b> :<br><br><ul>')
             else:
-                overview_file.write( '</table></center></p><br><br><p><b>Quick nav-by-name tab</b>:<br><br><ul>'.encode( encoding ) )
-
+                f.write('</table></center></p><br><br><p><b>Quick nav-by-name tab</b>:<br><br><ul>')
 
             for g in managed:
-                to_write = '<li>[<a href="' + convertIntoFileName( g ) + '.html">' + g + '</a>]</li>'
-                overview_file.write( to_write.encode( encoding ) )
-            overview_file.write( '</ul></p>'.encode( encoding ) )
-            overview_file.write( updateFromTokenDic( footer_page_file.read().decode( encoding ) ).encode( encoding ) )
+                to_write = '<li>[<a href="' + convert_into_filename(g) + '.html">' + g + '</a>]</li>'
+                f.write(to_write)
 
-        if len( remainder ):
-            pageCount += 1
-            generateOverview( remainder, pageCount, totalPageCount, comment, False )
+            f.write('</ul></p>')
+            f.write(update_from_token_dic(footer_content))
 
-
-
-def removeThumbnailsFrom( fileList ):
-        """
-        Removes the thumbnails from the list, in order not to generate thumbnails for thumbnails in case of multiple yag-osdl runs.
-        """
-        # PNG or JPEG:
-        return [ f for f in fileList if string.find( f, '-thumbnail.' ) == -1 ]
+        if remainder:
+            page_count += 1
+            generate_overview(remainder, page_count, total_page_count, comment, False)
 
 
 
-def processDirectory( rootLevel ):
-        """Generates all information regarding the specified directory."""
+def remove_thumbnails_from(filenames):
+    """Removes the thumbnails from the list of filenames, in order not to generate
+    thumbnails for thumbnails in case of multiple yag-osdl runs.
+    """
+    # PNG or JPEG:
+    return [f for f in filenames if f.find('-thumbnail.') == -1]
 
-        if os.path.basename( tokenDic[ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ] ) == resourceDirectoryName:
-            print( "Ignoring yag's own resource directory <%s>." % ( resourceDirectoryName, ) )
 
-        outputDevice.debug( 'Processing %s' % ( tokenDic[ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ], ) )
-        generateMenuForDirectory( rootLevel )
-        graphics, sounds, unknown = scanDirectoryForContent( tokenDic[ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ] )
 
-        graphics = removeThumbnailsFrom( graphics )
+def process_dir(root_level):
+    """Generates all information regarding the specified directory."""
 
-        # Allows to sort images according to lexical order:
-        graphics.sort()
+    if os.path.basename(token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY']) == resource_directory_name:
+        print("Ignoring yag's own resource directory '%s'." % (resource_directory_name,))
 
-        previous, current = None, None
-        image_count = 0
-        overview_count = 0
-        images_per_overview = int( mainDic[ 'images_by_column' ] ) * int( mainDic[ 'images_by_row' ] )
-        for next in graphics:
-                if current:
-                        image_count += 1
-                        if image_count == images_per_overview + 1:
-                                overview_count += 1
-                                image_count = 1
-                        generateFullPageForGraphic( previous, current, next, overview_count )
-                previous = current
-                current = next
-                next = None
+    output_device.debug("Processing %s." % (token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY'],))
+    generate_menu_for_dir(root_level)
+    graphics, sounds, unknown = scan_dir_for_content(token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY'])
 
+    graphics = remove_thumbnails_from(graphics)
+
+    # Allows to sort images according to lexical order:
+    graphics.sort()
+
+    previous, current = None, None
+    image_count = 0
+    overview_count = 0
+    images_per_overview = int(main_dic['images_by_column']) * int(main_dic['images_by_row'])
+    for next in graphics:
         if current:
+            image_count += 1
             if image_count == images_per_overview + 1:
                 overview_count += 1
-            generateFullPageForGraphic( previous, current, next, overview_count )
+                image_count = 1
+            generate_full_page_for_graphic(previous, current, next, overview_count)
+        previous = current
+        current = next
+        next = None
 
-        comment_file = os.path.join( tokenDic[ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ], galleryCommentFilename )
+    if current:
+        if image_count == images_per_overview + 1:
+            overview_count += 1
+        generate_full_page_for_graphic(previous, current, next, overview_count)
 
-        gallery_comment = None
+    comment_filepath = os.path.join(token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY'], gallery_comment_filename)
 
-        if os.path.isfile( comment_file ):
-            gallery_comment = file( comment_file, 'r' ).read().decode( encoding )
+    gallery_comment = None
 
-        generateOverview( graphics, 0, None, gallery_comment, rootLevel )
+    if os.path.isfile(comment_filepath):
+        with open(comment_filepath, 'r', encoding=yag_encoding) as f:
+            gallery_comment = f().read()
 
-
-def scanContent( contentDir, outputDir, rootPath ):
-        """
-        Scans content from specified directory. Will be first called with only one argument,
-        then will recursing will add a second order, to keep track of base directory.
-        """
-        print
-        outputDevice.debug( 'Scanning from content directory <%s>, will write in <%s>, with root directory being <%s>...' % ( contentDir, outputDir, rootPath ) )
-
-        # Updating the token directory:
-        tokenDic[ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ] = contentDir
-        tokenDic[ 'YAG-OSDL-TOKEN-OUTPUT-DIRECTORY' ]  = outputDir
-        tokenDic[ 'YAG-OSDL-TOKEN-ROOT-PATH' ]         = rootPath
-
-        outputDevice.debug( 'Processing content directory' )
-        #outputDevice.debug( 'Subdirectories are %s.' % ( fileUtils.getChildrenDirectories( contentDir ), ) )
-        processDirectory( rootPath == '.' )
-
-        # Recursing:
-        for d in fileUtils.getChildrenDirectories( contentDir ):
-            # Do not index our own resource directory! (it has however to be
-            # self-contained in output directory)
-            if d != resourceDirectoryName:
-                #print( 'scanContent: recursing in %s' % ( d,) )
-                tokenDic[ 'YAG-OSDL-TOKEN-PARENT-DIRECTORY' ] = outputDir
-                tokenDic[ 'YAG-OSDL-TOKEN-PARENT-SHORT-DIRECTORY' ] = os.path.basename( outputDir )
-                scanContent( os.path.join( contentDir, d ), os.path.join( outputDir, d ), os.path.join( rootPath, '..' ) )
+    generate_overview(graphics, 0, None, gallery_comment, root_level)
 
 
 
-def installHelperFiles():
-        """Install helper file in output directory."""
-        # Install the helper files (ex: css):
-        target_helper_dir = os.path.join( mainDic[ 'output_directory' ], resourceDirectoryName )
+def scan_content(content_dir, output_dir, root_path):
+    """Scans content from specified directory. Will be first called with only
+    one argument, then will recursing will add a second order, to keep track of
+    base directory.
+    """
+    print()
+    output_device.debug("Scanning from content directory '%s', will write in '%s', with root directory being '%s'..." % (content_dir, output_dir, root_path))
 
-        outputDevice.debug( 'Installing helper files from <%s> to <%s>.' % ( mainDic[ 'helper_files_directory' ], target_helper_dir ) )
-        if os.path.exists( target_helper_dir ):
-            outputDevice.debug( 'Deleting previously existing resource directory.' )
-            shutil.rmtree( target_helper_dir )
-        shutil.copytree( mainDic[ 'helper_files_directory' ], target_helper_dir )
-        for f in fileUtils.getFilesInDir( os.path.join( mainDic[ 'theme_directory' ], 'Images' ) ):
-            shutil.copy( os.path.join( mainDic[ 'theme_directory' ], 'Images', f ), target_helper_dir )
-        shutil.copy( os.path.join( target_helper_dir, 'Page.css' ), os.path.join( target_helper_dir, mainDic[ 'theme' ] ) + '.css' )
+    # Updating the token directory:
+    token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY'] = content_dir
+    token_dic['YAG-OSDL-TOKEN-OUTPUT-DIRECTORY']  = output_dir
+    token_dic['YAG-OSDL-TOKEN-ROOT-PATH']         = root_path
 
+    output_device.debug("Processing content directory")
+    #output_device.debug("Subdirectories are '%s'." % (file_utils.get_children_dirs(content_dir),))
+    process_dir(root_path == '.')
 
-
-def generateGalleryMainPage():
-        """Generates main page for gallery."""
-        target_filename = os.path.join( mainDic[ 'output_directory' ], 'Main' + mainDic[ 'project_name'] + htmlExtension )
-        outputDevice.debug( 'Gallery main page will be <%s>.' % ( target_filename, ) )
-        shutil.copy( os.path.join( mainDic[ 'theme_directory' ], 'Templates', 'MainPageGallery.template.html' ), target_filename )
-        updated_content = file( target_filename, 'r' ).read().decode( encoding )
-
-        file( target_filename, 'w' ).write( updateFromTokenDic( updated_content ).encode( encoding ) )
-
-
-
-def generateGalleryFrameset():
-        """Generates frame set for gallery."""
-        output_dir = mainDic[ 'output_directory' ]
-        target_filename = os.path.join( output_dir, mainDic[ 'project_name'] + htmlExtension )
-        target_filename_theme = os.path.join( output_dir, mainDic[ 'project_name'] + '-theme' + htmlExtension )
-        outputDevice.debug( 'Gallery frameset will be <%s>.' % ( target_filename, ) )
-        tokenDic[ 'YAG-OSDL-TOKEN-FIRST-MENU' ] = os.path.basename( tokenDic[ 'YAG-OSDL-TOKEN-MENU' ] )
-
-        frameset_template = os.path.join( mainDic[ 'theme_directory' ], 'Templates', 'FrameSet.template.html' )
-
-        shutil.copy( frameset_template, target_filename )
-        shutil.copy( frameset_template, target_filename_theme )
-
-        updated_content = updateFromTokenDic( file( target_filename, 'r' ).read().decode( encoding ) )
-        file( target_filename, 'w' ).write( updated_content.encode( encoding ) )
-
-        save = tokenDic[ 'YAG-OSDL-TOKEN-FIRST-MENU' ]
-        tokenDic[ 'YAG-OSDL-TOKEN-FIRST-MENU' ] = save.replace( '.html', '-theme.html' )
-
-        updated_content = updateFromTokenDic( file( target_filename_theme, 'r' ).read().decode( encoding ) )
-        file( target_filename_theme, 'w' ).write( updated_content.encode( encoding ) )
-
-        tokenDic[ 'YAG-OSDL-TOKEN-FIRST-MENU' ] = save
+    # Recursing:
+    for d in file_utils.get_children_dirs(content_dir):
+        # Do not index our own resource directory! (it has however to be
+        # self-contained in output directory)
+        if d != resource_directory_name:
+            #print("scan_content: recursing in '%s'." % (d,))
+            token_dic['YAG-OSDL-TOKEN-PARENT-DIRECTORY'] = output_dir
+            token_dic['YAG-OSDL-TOKEN-PARENT-SHORT-DIRECTORY'] = os.path.basename(output_dir)
+            scan_content(os.path.join(content_dir, d), os.path.join(output_dir, d), os.path.join(root_path, '..'))
 
 
 
+def install_helper_files():
+   """Installs helper file in output directory."""
+   # Install the helper files (ex: css):
+   target_helper_dir = os.path.join(main_dic['output_directory'], resource_directory_name)
 
-def generateLoadingPage():
-        """Generates frame set for gallery."""
-        target_filename = os.path.join( mainDic[ 'output_directory' ], resourceDirectoryName, 'black.html' )
-        #outputDevice.debug( 'Loading page will be <%s>.' % ( target_filename, ) )
-        source_file = os.path.join( mainDic[ 'theme_directory' ], 'Templates', 'Black.template.html' )
-        #outputDevice.debug( 'Copy from <%s> to <%s>.' % ( source_file, target_filename ) )
-        shutil.copy( source_file, target_filename )
-        updated_content = updateFromTokenDic( file( target_filename, 'r' ).read().decode( encoding ) )
-        file( target_filename, 'w' ).write( updated_content.encode( encoding ) )
+   output_device.debug("Installing helper files from '%s' to '%s'." % (main_dic['helper_files_directory'], target_helper_dir))
+   if os.path.exists(target_helper_dir):
+       output_device.debug("Deleting previously existing resource directory.")
+       shutil.rmtree(target_helper_dir)
+   shutil.copytree(main_dic['helper_files_directory'], target_helper_dir)
+   for f in file_utils.get_files_in_dir(os.path.join(main_dic['theme_directory'], 'images')):
+       shutil.copy(os.path.join(main_dic['theme_directory'], 'images', f), target_helper_dir)
+   shutil.copy(os.path.join(target_helper_dir, 'Page.css'), os.path.join(target_helper_dir, main_dic['theme']) + '.css')
 
 
 
-def main( contentDir=None, configFilename=None ):
-        """
-        Main function, controller of the yag-osdl.
-        Must be called with:
-                        - content_directory, the name of the directory with content to scan,
-                        - optionnally, configFilename, the filename of the configuration file.
+def generate_gallery_main_page():
+    """Generates main page for gallery."""
+    target_filepath = os.path.join(main_dic['output_directory'], 'Main' + main_dic['project_name'] + html_extension)
+    output_device.debug("Gallery main page will be '%s'." % (target_filepath,))
+    shutil.copy(os.path.join(main_dic['theme_directory'], 'templates', 'MainPageGallery.template.html'), target_filepath)
+    with open(target_filepath, 'r', encoding=yag_encoding) as f:
+        updated_content = f.read()
 
-                Other main informations such as:
-                        - themeName, the name of the theme to be used,
-                        - resource_directory, the name of the directory containing resources such as templates
-                and images necessary to generate the content website, etc.
-                are to be found from configFilename, otherwise will take default values.
-        """
+    with open(target_filepath, 'w', encoding=yag_encoding) as f:
+        f.write(update_from_token_dic(updated_content))
 
-        global mainDic, tokenDic
 
-        global outputDevice
 
-        # Select log output:
-        outputDevice = generalUtils.ScreenDisplay()
+def generate_gallery_frameset():
+    """Generates frameset for gallery."""
+    output_dir = main_dic['output_directory']
+    target_filepath = os.path.join(output_dir, main_dic['project_name'] + html_extension)
+    output_device.debug("Gallery frameset will be '%s'." % (target_filepath,))
+    token_dic['YAG-OSDL-TOKEN-FIRST-MENU'] = os.path.basename(token_dic['YAG-OSDL-TOKEN-MENU'])
+
+    frameset_template = os.path.join(main_dic['theme_directory'], 'templates', 'FrameSet.template.html')
+
+    shutil.copy(frameset_template, target_filename)
+
+    with open(target_filepath, 'r', encoding=yag_encoding) as f:
+        updated_content = update_from_token_dic(f.read())
+
+    with open(target_filepath, 'w', encoding=yag_encoding) as f:
+        f.write( updated_content )
+
+    save = token_dic['YAG-OSDL-TOKEN-FIRST-MENU']
+    token_dic['YAG-OSDL-TOKEN-FIRST-MENU'] = save.replace('.html', '-theme.html')
+
+    target_filepath_thm = os.path.join(output_dir, main_dic['project_name'] + '-theme' + html_extension)
+    shutil.copy(frameset_template, target_filename_theme)
+
+    with open(target_filename_theme, 'r', encoding=yag_encoding) as f:
+        updated_content = update_from_token_dic(f.read())
+
+    with open(target_filename_theme, 'w', encoding=yag_encoding) as f:
+        f.write(updated_content)
+
+    token_dic['YAG-OSDL-TOKEN-FIRST-MENU'] = save
+
+
+
+def generate_loading_page():
+    """Generates the gallery loading page."""
+    target_filepath = os.path.join(main_dic['output_directory'], resource_directory_name, 'black.html')
+    #output_device.debug("Loading page will be '%s'." % (target_filepath,))
+    source_file = os.path.join(main_dic['theme_directory'], 'templates', 'black.template.html')
+    #output_device.debug("Copy from '%s' to '%s'." % (source_file, target_filepath))
+    shutil.copy(source_file, target_filepath)
+
+    with open(target_filepath, 'r', encoding=yag_encoding) as f:
+        updated_content = update_from_token_dic(f.read())
+
+    with open(target_filepath, 'w', encoding=yag_encoding) as f:
+        f.write(updated_content)
+
+
+
+def main(content_dir=None, config_filename=None):
+    """Main function, controller of the yag-osdl.
+    Must be called with:
+        - content_directory, the name of the directory with content to scan
+        - optionally, config_filename, the filename of the configuration file
+
+    Other main information such as:
+        - theme_name, the name of the theme to be used
+        - resource_directory, the name of the directory containing resources
+    such as templates and images necessary to generate the content website, etc.
+    are to be found from config_filename, otherwise will take default values.
+    """
+    global main_dic, token_dic
+    global output_device
+
+    # Select log output:
+    output_device = general_utils.ScreenDisplay()
 
 
     # Original hardcoded dictionary for the defaults:
-        mainDic = {
-                'project_name'         : 'Project name not specified',
-                'content_directory'    : contentDir,
-                'resource_directory'   : os.path.join( os.getcwd(), 'Resources' ),
-                'output_in_content'    : 'False',
-                'output_directory'     : os.path.join( os.getcwd(), 'output' ),
-                'theme'                : 'Default-theme',
-                'thumbsize'            : '60',
-                'images_by_row'        : '3',
-                'images_by_column'     : '3',
-                'dash_is_space_in_menu': 'False',
-                'author'               : 'Author not specified',
-                'author_mail'          : 'Author mail not specified',
-                'gallery_license_file' : None,
-                'gallery_info_file'    : None,
-                'themes'               : NodeTheme( "RootTheme" )
-        }
+    main_dic = {
+            'project_name'         : 'Project name not specified',
+            'content_directory'    : content_dir,
+            'resource_directory'   : os.path.join(os.getcwd(), 'resources'),
+            'output_in_content'    : "False",
+            'output_directory'     : os.path.join(os.getcwd(), 'output'),
+            'language'             : 'English',
+            'theme'                : 'Default-theme',
+            'thumbsize'            : '60',
+            'images_by_row'        : '3',
+            'images_by_column'     : '3',
+            'dash_is_space_in_menu': "False",
+            'author'               : 'Author not specified',
+            'author_mail'          : 'Author mail not specified',
+            'gallery_license_file' : None,
+            'gallery_info_file'    : None,
+            'themes'               : NodeTheme("RootTheme")
+    }
 
-        if configFilename:
-            if not os.path.isfile( configFilename ):
-                raise YagException( 'Specified configuration file %s does not exist.' % ( configFilename, ) )
-            outputDevice.info( 'Using configuration file <%s>.' % ( configFilename, ) )
-            updateConfigurationFromFile( mainDic, configFilename )
+    if config_filename:
+        if not os.path.isfile(config_filename):
+            raise YagException("Specified configuration file '%s' does not exist." % (config_filename,))
+        output_device.info("Using configuration file '%s'." % (config_filename,))
+        update_config_from_file(main_dic, config_filename)
+    else:
+        output_device.info("No configuration file supplied, using hardcoded defaults.")
+
+    # Converts booleans-as-strings to actual booleans (ex: "False" to False):
+
+    output_in_c_bool = bool( distutils.util.strtobool( main_dic['output_in_content'] ) )
+    main_dic['output_in_content'] = output_in_c_bool
+
+    dash_bool = bool( distutils.util.strtobool( main_dic['dash_is_space_in_menu'] ) )
+    main_dic['dash_is_space_in_menu'] = dash_bool
+
+
+    # Avoid any slash at the end of path:
+    content_dir = os.path.normpath( main_dic['content_directory'] )
+
+    if not content_dir:
+        raise YagException("No content directory to scan has been specified, neither through command line nor configuration file.")
+
+    if not os.path.isdir(content_dir):
+        raise YagException("Content directory '%s' not found." % (content_dir,))
+
+    main_dic['content_directory'] = content_dir
+
+
+    output_device.debug("Checking resource directories...")
+
+    resource_directory = check_directory(main_dic['resource_directory'])
+
+    theme_directory        = check_directory(os.path.join(resource_directory, 'themes', main_dic['theme']))
+    image_directory        = check_directory(os.path.join(theme_directory, 'images'))
+    template_directory     = check_directory(os.path.join(theme_directory, 'templates'))
+    helper_files_directory = check_directory(os.path.join(theme_directory, 'helper-files'))
+
+    main_dic['theme_directory']        = theme_directory
+    main_dic['image_directory']        = image_directory
+    main_dic['template_directory']     = template_directory
+    main_dic['helper_files_directory'] = helper_files_directory
+
+    # Now we prefer raising an exception if generating output outside of content
+    # whereas the corresponding directory already exists (later):
+    #
+    #main_dic['output_directory'] = file_utils.find_next_new_dir_name(main_dic['output_directory'])
+
+    output_device.debug("Showing the validated settings...")
+    general_utils.display_dic(main_dic)
+
+    # If an image is not available, alternative text will be displayed.
+    navigation_images = add_prefix_to_filenames(image_directory, ['index.png', 'next.png', 'previous.png', 'up.png', 'down.png', 'root.png'])
+
+    # All templates files must be here:
+    templates_files = add_prefix_to_filenames(template_directory, ['HeaderMenu.template.html', 'FooterMenu.template.html', 'HeaderGallery.template.html', 'FooterGallery.template.html', 'HeaderImage.template.html', 'FooterImage.template.html'])
+
+    if not do_all_files_exist(templates_files):
+        raise YagException("Not all template files available in template directory %s." % (template_directory,))
+
+    output_device.debug("All template files found.")
+
+    # Will work even if those are not found:
+    html_files = add_prefix_to_filenames(helper_files_directory, ['Menu.css', 'Page.css'])
+
+    # By construction, output_directory should point to a non-existing
+    # directory. Creating it unconditionnally if we are not to create website
+    # among existing content:
+    #
+    if main_dic['output_in_content']:
+        output_dir = main_dic['content_directory']
+        output_device.debug("Setting output directory to content one, '%s'." % (output_dir,))
+        main_dic['output_directory'] = output_dir
+    else:
+        output_dir = main_dic['output_directory']
+        if os.path.exists(output_dir):
+            raise YagException("Output directory '%s' already exists, please remove it first." % (output_dir,))
         else:
-            outputDevice.info( 'No configuration file supplied, using hardcoded defaults.' )
+            output_device.debug("Creating output directory '%s'." % (output_dir,))
+            os.mkdir(output_dir)
 
-        if not mainDic[ 'content_directory' ]:
-            raise YagException( 'No content directory to scan has been specified, neither through command line nor configuration file.' )
+    resource_dir = os.path.join(main_dic['output_directory'], resource_directory_name)
+    if not os.path.exists(resource_dir):
+        os.mkdir(resource_dir)
 
-        # Avoid any slash at the end of path:
-        mainDic[ 'content_directory' ] = os.path.normpath( mainDic[ 'content_directory' ] )
+    init_token_dic()
 
-        if not os.path.isdir( mainDic[ 'content_directory' ] ):
-            raise YagException( 'Content directory <%s> not found.' % ( mainDic[ 'content_directory' ], ) )
+    # Shows the token substitutions:
+    #general_utils.display_dic(token_dic)
 
-        outputDevice.debug( 'Checking resource directories...' )
+    preload_themes()
 
-        resource_directory = checkDirectory( mainDic[ 'resource_directory' ] )
+    # Starts the recursive indexing:
+    root_path = '.'
+    scan_content(content_dir, output_dir, root_path)
+    print()
+    output_device.debug("Scanning from content directory '%s', will write in '%s', with root directory being '%s'..." % (content_dir, output_dir, root_path))
 
-        theme_directory        = checkDirectory( os.path.join( resource_directory, 'Themes', mainDic[ 'theme' ] ) )
-        image_directory        = checkDirectory( os.path.join( theme_directory, 'Images' ) )
-        template_directory     = checkDirectory( os.path.join( theme_directory, 'Templates' ) )
-        helper_files_directory = checkDirectory( os.path.join( theme_directory, 'HelperFiles' ) )
+    # Updating the token directory:
+    token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY'] = content_dir
+    token_dic['YAG-OSDL-TOKEN-OUTPUT-DIRECTORY']  = output_dir
+    token_dic['YAG-OSDL-TOKEN-ROOT-PATH']         = root_path
 
-        mainDic[ 'theme_directory' ]        = theme_directory
-        mainDic[ 'image_directory' ]        = image_directory
-        mainDic[ 'template_directory' ]     = template_directory
-        mainDic[ 'helper_files_directory' ] = helper_files_directory
+    output_device.debug("Processing content directory")
+    #output_device.debug("Subdirectories are '%s'." % (file_utils.get_children_dirs(content_dir),))
+    process_dir(root_path == '.')
 
-        mainDic[ 'output_directory' ] = fileUtils.findNextNewDirectoryName( mainDic[ 'output_directory' ] )
+    # Recursing:
+    for d in file_utils.get_children_dirs(content_dir):
+        # Do not index our own resource directory! (it has however to be
+        # self-contained in output directory.
+        if d != resource_directory_name:
+            #print("scan_content: recursing in %s" % (d,))
+            token_dic['YAG-OSDL-TOKEN-PARENT-DIRECTORY'] = output_dir
+            token_dic['YAG-OSDL-TOKEN-PARENT-SHORT-DIRECTORY'] = os.path.basename(output_dir)
+            scan_content(os.path.join(content_dir, d), os.path.join(output_dir, d), os.path.join(root_path, '..'))
 
 
-        # Show the settings:
-        generalUtils.displayDic( mainDic )
-
-        # If an image is not available, alternative text will be displayed.
-        navigation_images = addPrefixToFileList( image_directory, [ 'index.png', 'next.png', 'previous.png', 'up.png', 'down.png', 'root.png' ] )
-
-        # All templates files must be here.
-        templates_files = addPrefixToFileList( template_directory, [ 'HeaderMenu.template.html', 'FooterMenu.template.html', 'HeaderGallery.template.html', 'FooterGallery.template.html', 'HeaderImage.template.html', 'FooterImage.template.html' ] )
-
-        if not filesAllExist( templates_files ):
-            raise YagException( 'Not all template files available in template directory %s.' % ( template_directory, ) )
-
-        outputDevice.debug( 'All template files found.' )
-
-        # Will work even if those are not found.
-        html_files = addPrefixToFileList( helper_files_directory, [ 'Menu.css', 'Page.css' ] )
-
-        # By construction, output_directory should point to a non-existing directory.
-        # Creating it unconditionnally if we are not to create website among existing content:
-
-        # 'False' and False are different!
-        if mainDic[ 'output_in_content' ] == 'False':
-            os.mkdir( mainDic[ 'output_directory' ] )
-        else:
-            mainDic[ 'output_directory' ] = mainDic[ 'content_directory' ]
-
-        resourceDir = os.path.join( mainDic[ 'output_directory' ], resourceDirectoryName )
-        if not os.path.exists( resourceDir ):
-            os.mkdir( resourceDir )
-
-        initTokenDic()
-
-        # Shows the token substitutions:
-        #generalUtils.displayDic( tokenDic )
-
-        preloadThemes()
-
-        # Starts the recursive indexing:
-        rootPath = '.'
-        scanContent( contentDir, outputDir, rootPath )
-        print
-        outputDevice.debug( 'Scanning from content directory <%s>, will write in <%s>, with root directory being <%s>...' % ( contentDir, outputDir, rootPath ) )
-
-        # Updating the token directory:
-        tokenDic[ 'YAG-OSDL-TOKEN-CONTENT-DIRECTORY' ] = contentDir
-        tokenDic[ 'YAG-OSDL-TOKEN-OUTPUT-DIRECTORY' ]  = outputDir
-        tokenDic[ 'YAG-OSDL-TOKEN-ROOT-PATH' ]         = rootPath
-
-        outputDevice.debug( 'Processing content directory' )
-        #outputDevice.debug( 'Subdirectories are %s.' % ( fileUtils.getChildrenDirectories( contentDir ), ) )
-        processDirectory( rootPath == '.' )
-
-        # Recursing:
-        for d in fileUtils.getChildrenDirectories( contentDir ):
-            # Do not index our own resource directory ! (it has however to be self-contained in
-            # output directory.
-            if d != resourceDirectoryName:
-                #print( 'scanContent: recursing in %s' % ( d,) )
-                tokenDic[ 'YAG-OSDL-TOKEN-PARENT-DIRECTORY' ] = outputDir
-                tokenDic[ 'YAG-OSDL-TOKEN-PARENT-SHORT-DIRECTORY' ] = os.path.basename( outputDir )
-                scanContent( os.path.join( contentDir, d ), os.path.join( outputDir, d ), os.path.join( rootPath, '..' ) )
-
-
-
-def installHelperFiles():
-        """Install helper file in output directory."""
-        # Install the helper files (ex: css):
-        target_helper_dir = os.path.join( mainDic[ 'output_directory' ], resourceDirectoryName )
-
-        outputDevice.debug( 'Installing helper files from <%s> to <%s>.' % ( mainDic[ 'helper_files_directory' ], target_helper_dir ) )
-        if os.path.exists( target_helper_dir ):
-            outputDevice.debug( 'Deleting previously existing resource directory.' )
-            shutil.rmtree( target_helper_dir )
-        shutil.copytree( mainDic[ 'helper_files_directory' ], target_helper_dir )
-        for f in fileUtils.getFilesInDir( os.path.join( mainDic[ 'theme_directory' ], 'Images' ) ):
-            shutil.copy( os.path.join( mainDic[ 'theme_directory' ], 'Images', f ), target_helper_dir )
-        shutil.copy( os.path.join( target_helper_dir, 'Page.css' ), os.path.join( target_helper_dir, mainDic[ 'theme' ] ) + '.css' )
-
-
-
-def generateGalleryMainPage():
-        """Generates main page for gallery."""
-        target_filename = os.path.join( mainDic[ 'output_directory' ], 'Main' + mainDic[ 'project_name'] + htmlExtension )
-        outputDevice.debug( 'Gallery main page will be <%s>.' % ( target_filename, ) )
-        shutil.copy( os.path.join( mainDic[ 'theme_directory' ], 'Templates', 'MainPageGallery.template.html' ), target_filename )
-        updated_content = file( target_filename, 'r' ).read().decode( encoding )
-
-        file( target_filename, 'w' ).write( updateFromTokenDic( updated_content ).encode( encoding ) )
-
-
-
-def generateGalleryFrameset():
-        """Generates frame set for gallery."""
-        output_dir = mainDic[ 'output_directory' ]
-        target_filename = os.path.join( output_dir, mainDic[ 'project_name'] + htmlExtension )
-        target_filename_theme = os.path.join( output_dir, mainDic[ 'project_name'] + '-theme' + htmlExtension )
-        outputDevice.debug( 'Gallery frameset will be <%s>.' % ( target_filename, ) )
-        tokenDic[ 'YAG-OSDL-TOKEN-FIRST-MENU' ] = os.path.basename( tokenDic[ 'YAG-OSDL-TOKEN-MENU' ] )
-
-        frameset_template = os.path.join( mainDic[ 'theme_directory' ], 'Templates', 'FrameSet.template.html' )
-
-        shutil.copy( frameset_template, target_filename )
-        shutil.copy( frameset_template, target_filename_theme )
-
-        updated_content = updateFromTokenDic( file( target_filename, 'r' ).read().decode( encoding ) )
-        file( target_filename, 'w' ).write( updated_content.encode( encoding ) )
-
-        save = tokenDic[ 'YAG-OSDL-TOKEN-FIRST-MENU' ]
-        tokenDic[ 'YAG-OSDL-TOKEN-FIRST-MENU' ] = save.replace( '.html', '-theme.html' )
-
-        updated_content = updateFromTokenDic( file( target_filename_theme, 'r' ).read().decode( encoding ) )
-        file( target_filename_theme, 'w' ).write( updated_content.encode( encoding ) )
-
-        tokenDic[ 'YAG-OSDL-TOKEN-FIRST-MENU' ] = save
-
-
-
-
-def generateLoadingPage():
-        """Generates frame set for gallery."""
-        target_filename = os.path.join( mainDic[ 'output_directory' ], resourceDirectoryName, 'black.html' )
-        #outputDevice.debug( 'Loading page will be <%s>.' % ( target_filename, ) )
-        source_file = os.path.join( mainDic[ 'theme_directory' ], 'Templates', 'Black.template.html' )
-        #outputDevice.debug( 'Copy from <%s> to <%s>.' % ( source_file, target_filename ) )
-        shutil.copy( source_file, target_filename )
-        updated_content = updateFromTokenDic( file( target_filename, 'r' ).read().decode( encoding ) )
-        file( target_filename, 'w' ).write( updated_content.encode( encoding ) )
-
-
-
-def main( contentDir=None, configFilename=None ):
-        """
-        Main function, controller of the yag-osdl.
-        Must be called with:
-                        - content_directory, the name of the directory with content to scan,
-                        - optionnally, configFilename, the filename of the configuration file.
-
-                Other main informations such as:
-                        - themeName, the name of the theme to be used,
-                        - resource_directory, the name of the directory containing resources such as templates
-                and images necessary to generate the content website, etc.
-                are to be found from configFilename, otherwise will take default values.
-        """
-
-        global mainDic, tokenDic
-
-        global outputDevice
-
-        # Select log output:
-        outputDevice = generalUtils.ScreenDisplay()
-
-
-    # Original hardcoded dictionary for the defaults:
-        mainDic = {
-                'project_name'         : 'Project name not specified',
-                'content_directory'    : contentDir,
-                'resource_directory'   : os.path.join( os.getcwd(), 'Resources' ),
-                'output_in_content'    : 'False',
-                'output_directory'     : os.path.join( os.getcwd(), 'output' ),
-                'theme'                : 'Default-theme',
-                'language'             : 'English',
-                'thumbsize'            : '60',
-                'images_by_row'        : '3',
-                'images_by_column'     : '3',
-                'dash_is_space_in_menu': 'False',
-                'author'               : 'Author not specified',
-                'author_mail'          : 'Author mail not specified',
-                'gallery_license_file' : None,
-                'gallery_info_file'    : None,
-                'themes'               : NodeTheme( "RootTheme" )
-        }
-
-        if configFilename:
-            if not os.path.isfile( configFilename ):
-                raise YagException( 'Specified configuration file %s does not exist.' % ( configFilename, ) )
-            outputDevice.info( 'Using configuration file <%s>.' % ( configFilename, ) )
-            updateConfigurationFromFile( mainDic, configFilename )
-        else:
-            outputDevice.info( 'No configuration file supplied, using hardcoded defaults.' )
-
-        if not mainDic[ 'content_directory' ]:
-            raise YagException( 'No content directory to scan has been specified, neither through command line nor configuration file.' )
-
-        # Avoid any slash at the end of path:
-        mainDic[ 'content_directory' ] = os.path.normpath( mainDic[ 'content_directory' ] )
-
-        if not os.path.isdir( mainDic[ 'content_directory' ] ):
-            raise YagException( 'Content directory <%s> not found.' % ( mainDic[ 'content_directory' ], ) )
-
-        outputDevice.debug( 'Checking resource directories...' )
-
-        resource_directory = checkDirectory( mainDic[ 'resource_directory' ] )
-
-        theme_directory        = checkDirectory( os.path.join( resource_directory, 'Themes', mainDic[ 'theme' ] ) )
-        image_directory        = checkDirectory( os.path.join( theme_directory, 'Images' ) )
-        template_directory     = checkDirectory( os.path.join( theme_directory, 'Templates' ) )
-        helper_files_directory = checkDirectory( os.path.join( theme_directory, 'HelperFiles' ) )
-
-        mainDic[ 'theme_directory' ]        = theme_directory
-        mainDic[ 'image_directory' ]        = image_directory
-        mainDic[ 'template_directory' ]     = template_directory
-        mainDic[ 'helper_files_directory' ] = helper_files_directory
-
-        mainDic[ 'output_directory' ] = fileUtils.findNextNewDirectoryName( mainDic[ 'output_directory' ] )
-
-
-        # Show the settings:
-        generalUtils.displayDic( mainDic )
-
-        # If an image is not available, alternative text will be displayed.
-        navigation_images = addPrefixToFileList( image_directory, [ 'index.png', 'next.png', 'previous.png', 'up.png', 'down.png', 'root.png' ] )
-
-        # All templates files must be here.
-        templates_files = addPrefixToFileList( template_directory, [ 'HeaderMenu.template.html', 'FooterMenu.template.html', 'HeaderGallery.template.html', 'FooterGallery.template.html', 'HeaderImage.template.html', 'FooterImage.template.html' ] )
-
-        if not filesAllExist( templates_files ):
-            raise YagException( 'Not all template files available in template directory %s.' % ( template_directory, ) )
-
-        outputDevice.debug( 'All template files found.' )
-
-        # Will work even if those are not found.
-        html_files = addPrefixToFileList( helper_files_directory, [ 'Menu.css', 'Page.css' ] )
-
-        # By construction, output_directory should point to a non-existing directory.
-        # Creating it unconditionnally if we are not to create website among existing content:
-
-        # 'False' and False are different!
-        if mainDic[ 'output_in_content' ] == 'False':
-            os.mkdir( mainDic[ 'output_directory' ] )
-        else:
-            mainDic[ 'output_directory' ] = mainDic[ 'content_directory' ]
-
-        resourceDir = os.path.join( mainDic[ 'output_directory' ], resourceDirectoryName )
-        if not os.path.exists( resourceDir ):
-            os.mkdir( resourceDir )
-
-        initTokenDic()
-
-        # Shows the token substitutions:
-        #generalUtils.displayDic( tokenDic )
-
-        preloadThemes()
-
-        # Starts the recursive indexing:
-        rootPath = '.'
-        scanContent( mainDic[ 'content_directory' ], mainDic[ 'output_directory' ], rootPath )
-
-        # Do it last to avoid that it is indexed too!
-
-        # Updates token:
-        tokenDic[ 'YAG-OSDL-TOKEN-ROOT-PATH' ] = '.'
-
-        tokenDic[ 'YAG-OSDL-TOKEN-OUTPUT-DIRECTORY' ] = mainDic[ 'output_directory' ]
-        menu_filename = os.path.join( mainDic[ 'output_directory' ], os.path.basename( mainDic[ 'output_directory' ] ) ) + 'Menu' + htmlExtension
-        tokenDic[ 'YAG-OSDL-TOKEN-MENU' ] = menu_filename
-
-        installHelperFiles()
-        generateLoadingPage()
-        generateGalleryMainPage()
-        generateGalleryFrameset()
-        generateThemePages()
-
-        shutil.copy( os.path.join( mainDic[ 'output_directory' ], 'Main' + mainDic[ 'project_name' ] + htmlExtension ), os.path.join( mainDic[ 'output_directory' ], 'index.html' ) )
-
-        print
-        print
-        print( "You can browse your new gallery from file://%s"  % ( os.path.join( mainDic[ 'output_directory' ], 'index.html' ), ) )
-        print
-        print( "      Enjoy!")
-        print
 
 ######## End of functions #########
 
@@ -1392,85 +1271,86 @@ def main( contentDir=None, configFilename=None ):
 
 #import atexit
 # Clean up at any exit.
-#atexit.register( cleanUp )
+#atexit.register(cleanUp)
 
 
 if __name__ == '__main__':
 
-    import os, sys, shutil, Image, tempfile, time
+    #import os, sys, shutil, Image, tempfile, time
 
-    from PIL import Image
+    #from PIL import Image
 
     # Python2:
-    import ConfigParser
+    #import ConfigParser
 
     # Python3:
     #import configparser
 
     # Be user-friendly!
-    generalUtils.activateNameCompletion()
+    general_utils.activate_name_completion()
 
     # Checks command line arguments.
     # In case of error or wrong syntax, use defaults.
     # Commmand line defaults:
-    defaultConfigFile = 'yag-osdl.conf'
-    configFile = None
-    source  = false
+    #
+    default_config_file = 'yag-osdl.conf'
+    config_file = None
+    source  = False
 
-    help_options    = [ '-h',  '--help' ]
-    config_options  = [ '-rc', '--config' ]
-    version_options = [ '-v',  '--version' ]
+    help_options    = ['-h',  '--help']
+    config_options  = ['-rc', '--config']
+    version_options = ['-v',  '--version']
 
     options = help_options + config_options + version_options
 
-    contentDir = None
+    content_dir = None
 
     option_start = 1
 
-    #print( 'Arguments specified are <%s>.' % ( sys.argv, ) )
+    #print("Arguments specified are '%s'." % (sys.argv,))
 
-    if len( sys.argv ) > 1 and sys.argv[ 1 ] not in options:
-        contentDir = sys.argv[ 1 ]
+    if len(sys.argv) > 1 and sys.argv[1] not in options:
+        content_dir = sys.argv[1]
         option_start = 2
 
     item_count = option_start
 
-    for item in sys.argv[ option_start: ]:
+    for item in sys.argv[option_start:]:
 
-        #print 'Examining argument %s.' % ( item, )
+        #print("Examining argument '%s'." % (item,)
         item_count += 1
 
         if item in help_options:
-            print( __doc__ )
-            sys.exit( 0 )
+            print(__doc__)
+            sys.exit(0)
 
         if item in config_options:
-            print( 'Configuration option detected.' )
+            print("Configuration option detected.")
             try:
-                configFile = sys.argv[ item_count ]
+                config_file = sys.argv[item_count]
             except IndexError:
-                configFile = defaultConfigFile
-            print( 'Configuration file will be <%s>.' % ( configFile, ) )
+                config_file = default_config_file
+            print("Configuration file will be '%s'." % (config_file,))
 
         if item in version_options:
-            print( "This is yag-osdl version %s." % ( yag_osdl_version, ) )
-            sys.exit( 0 )
+            print("This is yag-osdl version %s." % (yag_osdl_version,))
+            sys.exit(0)
 
-    if not configFile:
-        if os.path.exists( defaultConfigFile ):
-            print( 'No configuration file specified, found and using default one, <%s>.' % ( configFile, ) )
-            configFile = defaultConfigFile
+    if not config_file:
+        if os.path.exists(default_config_file):
+            print("No configuration file specified, found and using default one, '%s'." % (default_config_file,))
+            config_file = default_config_file
 
     # Start with main():
 
-    if contentDir:
-        print( 'Content directory specified through command line is <%s>.' % ( contentDir, ) )
+    if content_dir:
+        print("Content directory specified through command line is '%s'." % (content_dir,))
     else:
-        print( 'No content directory specified through command line.' )
+        print("No content directory specified through command line.")
 
-    if configFile:
-        print( 'Configuration file is <%s>.' % ( configFile, ) )
+    if config_file:
+        print("Configuration file is '%s'." % (config_file,))
     else:
-        print( 'No configuration file found.' )
+        print("No configuration file found.")
 
-    main( contentDir, configFile )
+    main(content_dir, config_file)
