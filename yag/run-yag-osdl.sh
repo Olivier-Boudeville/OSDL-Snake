@@ -1,6 +1,21 @@
 #!/bin/sh
 
-if [ "$1" = "--debug" ] ; then
+
+yag_root="$(dirname $0)"
+yag_osdl_exec="${yag_root}/yagosdl.py"
+
+usage="Usage: $(basename $0) [-h|--help] [--debug] [flags to pass to ${yag_osdl_exec}]
+  Notable flag: --config MY_CONFIG_FILE (see yag-osdl.conf.sample for an example) to define a configuration file (default one: 'yag-osdl.conf')
+  This script manages everything so that yag-osdl is successfully run, otherwise reports any error."
+
+
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+	echo "${usage}"
+	exit 0
+fi
+
+
+if [ "$1" = "--debug" ]; then
 	do_debug=0
 	shift
 else
@@ -8,73 +23,83 @@ else
 fi
 
 
-DEBUG()
+debug()
 # Displays a debug message if debug mode is activated (do_debug=true).
-# Usage: DEBUG "message 1" "message 2" ...
+# Usage: debug "message 1" "message 2" ...
 {
 	[ $do_debug -eq 1 ] || echo "Debug: $*"
 }
 
 
-YAG_ROOT=$(dirname $0)
-YAG_OSDL_EXEC=${YAG_ROOT}/"yagosdl.py"
 
-USAGE="
+yag_osdl_env_script="${yag_root}/yag-osdl-environment.sh"
 
-	Usage: $(basename $0) [--debug] [flags to pass to ${YAG_OSDL_EXEC}]
-
-	This script manages everything so that yag-osdl is successfully run, or informs in case of errors."
-
-
-YAG_OSDL_ENV_SCRIPT=${YAG_ROOT}/yag-osdl-environment.sh
-
-if [ ! -f "${YAG_OSDL_ENV_SCRIPT}" ] ; then
-	echo "No yag-osdl environment file found (no ${YAG_OSDL_ENV_SCRIPT}), aborting." 1>&2
-	exit 2
+if [ ! -f "${yag_osdl_env_script}" ]; then
+	echo "  No yag-osdl environment file found (no '${yag_osdl_env_script}'), aborting." 1>&2
+	exit 50
 fi
 
-CEYLAN_SNAKE_ROOT=${CEYLAN_SNAKE}
-
-if [ -z "${CEYLAN_SNAKE}" ] ; then
+if [ -z "${CEYLAN_SNAKE}" ]; then
 	echo "Error, no CEYLAN_SNAKE environment variable defined." 1>&2
-	exit 3
+	exit 55
 fi
 
-if [ ! -d "${CEYLAN_SNAKE}" ] ; then
-	echo "Error, non-existing CEYLAN_SNAKE directory (${CEYLAN_SNAKE})." 1>&2
-	exit 4
+
+if [ ! -d "${CEYLAN_SNAKE}" ]; then
+	echo "  Error, non-existing CEYLAN_SNAKE directory (${CEYLAN_SNAKE})." 1>&2
+	exit 60
 fi
 
 export PYTHONPATH="${CEYLAN_SNAKE}:${PYTHONPATH}"
 
 
-. ${YAG_OSDL_ENV_SCRIPT}
-
-PIL_MODULE="Image.py"
+. ${yag_osdl_env_script}
 
 
+# Python2 deprecated in favor of Python3.
+# PIL deprecated in favor of Pillow.
+# easy_install deprecated in favor of pip.
 
-if [ ! -x "${YAG_OSDL_EXEC}" ] ; then
-	echo "
-	Error, no executable yag-osdl script available (no executable <${YAG_OSDL_EXEC}> found).
-	$USAGE"
-	exit 10
+
+# We use a virtual environment first, that have been created based on
+# https://docs.python.org/3/tutorial/venv.html#creating-virtual-environments:
+# python3 -m venv yagosdl-env
+
+# Activating it:
+. yagosdl-env/bin/activate
+
+# Done to install Pillow
+# (cf. https://pillow.readthedocs.io/en/stable/installation.html), knowing that
+# many distributions offer the 'python-imaging' package for that:
+#
+# python3 -m pip install --upgrade pip
+# python3 -m pip install --upgrade Pillow
+#
+# For users, it is just a matter of entering:
+# python -m pip install -r requirements.txt
+#
+# This file has been generated thanks to 'pip freeze > requirements.txt' and put
+# in version control.
+
+if [ ! -x "${yag_osdl_exec}" ]; then
+	echo "  Error, no executable yag-osdl script available (no executable '${yag_osdl_exec}' found). ${usage}" 1>&2
+	exit 70
 fi
 
-if [ ! -f "${PIL_ROOT}/${PIL_MODULE}" ] ; then
-	# With gentoo: emerge imaging; arch: pacman -S python-imaging
-	echo "
-	Error, no PIL module available (no <${PIL_ROOT}/${PIL_MODULE}> file found).
-	$USAGE"
-	exit 15
-fi
+#pil_module="Image.py"
+#
+#if [ ! -f "${pil_root}/${pil_module}" ]; then
+#	# With Gentoo: emerge imaging; with Arch: pacman -S python-imaging
+#	echo "  Error, no PIL module available (no '${pil_root}/${pil_module}' file found). ${usage}" 1>&2
+#	exit 75
+#fi
 
 
 
-DEBUG "Running $YAG_OSDL_EXEC..."
+debug "Running ${yag_osdl_exec}..."
 
-if [ "$do_debug" -eq 0 ] ; then
-	/bin/python2 -i ${YAG_OSDL_EXEC} $*
+if [ $do_debug -eq 0 ]; then
+	/bin/python3 -i ${yag_osdl_exec} $*
 else
-	${YAG_OSDL_EXEC} $*
+	${yag_osdl_exec} $*
 fi

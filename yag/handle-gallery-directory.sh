@@ -2,23 +2,23 @@
 
 # Helper script for annotate-images.sh
 
-if [ "$#" != "1" ] ; then
-	echo "handleGalleryDirectory.sh: error, $# arguments given instead of 1" 1>&2
+if [ ! $# -eq 1 ]; then
+	echo "  $(basename $0): error, $# arguments given instead of 1." 1>&2
 	exit 20
 fi
 
-if [ ! -d "$1" ] ; then
-	echo "handleGalleryDirectory.sh: error, <$1> is not a file." 1>&2
+if [ ! -d "$1" ]; then
+	echo "  $(basename $0): error, '$1' is not a directory." 1>&2
 	exit 21
 fi
 
 
-GALLERY_DIRECTORY="$1"
+gallery_directory="$1"
 
-GALLERY_NAME=$(basename $GALLERY_DIRECTORY)
+gallery_name="$(basename ${gallery_directory})"
 
-echo " - please describe now the gallery '$GALLERY_NAME'..."
+echo " - please describe now the gallery '${gallery_name}'..."
 
-GALLERY_COMMENT_FILENAME='yag-gallery-comment.txt'
+gallery_comment_filename="yag-gallery-comment.txt"
 
-$EDITOR $GALLERY_DIRECTORY/$GALLERY_COMMENT_FILENAME
+$EDITOR "${gallery_directory}/${gallery_comment_filename}"

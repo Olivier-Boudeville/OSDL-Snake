@@ -1,51 +1,60 @@
 #!/bin/sh
 
-USAGE="Usage: `basename $0` [<directory where to start>]: allows to easily add comment and theme information in an image tree. Operates from current directory if no argument given."
+usage="Usage: $(basename $0) [ROOT_DIR]: allows to easily add comment and theme information through an image tree. If no argument is specified, operates from the current directory."
 
-OWN_DIR=$(dirname $0)
+own_dir="$(dirname $0)"
 
 
-if [ -z "$1" ] ; then
-	rootDir=($pwd)
+if [ -z "$1" ]; then
+
+	root_dir="$(pwd)"
+
 else
-	rootDir="$1"
-	if [ ! -d "$rootDir" ] ; then
-		echo "Error, specified image directory ($rootDir) does not exist." 1>&2
-		echo "$USAGE"
-		exit 1
+
+	root_dir="$1"
+
+	if [ ! -d "${root_dir}" ]; then
+
+		echo "  Error, specified image directory ('${root_dir}') does not exist.
+${usage}" 1>&2
+		exit 5
+
 	fi
+
 fi
 
 
-HANDLE_GALLERY=${OWN_DIR}/handleGalleryDirectory.sh
+handle_gallery="${own_dir}/handle-gallery-directory.sh"
 
-if [ ! -x "$HANDLE_GALLERY" ] ; then
-	echo "Error, no executable script to annotate gallery found (${$HANDLE_GALLERY})." 1>&2
+if [ ! -x "${handle_gallery}" ]; then
+	echo "  Error, no executable script to annotate a gallery found ('${handle_gallery}')." 1>&2
 	exit 10
 fi
 
-HANDLE_IMAGE=${OWN_DIR}/handleImage.sh
-if [ ! -x "$HANDLE_IMAGE" ] ; then
-	echo "Error, no executable script to annotate gallery found (${HANDLE_IMAGE})." 1>&2
-	exit 11
+handle_image="${own_dir}/handle-image.sh"
+
+if [ ! -x "${handle_image}" ]; then
+	echo "Error, no executable script to annotate an image found ('${handle_image}')." 1>&2
+	exit 15
 fi
 
-GUIDE="\n\tThis script will recursively scan from directory tree <$rootDir> and, for each gallery location and encountered image (X.jpeg or X.png), will show it to you and will allow you to edit first a comment for it (creating X.txt), then a theme list (creating X.thm)."
+guide="
+	This script will recursively scan root directory <${root_dir}> and, for each gallery location and encountered image (X.jpeg or X.png), will show it to you, and will allow you to edit first a comment for it (creating X.txt), then a theme list (creating X.thm)."
 
-echo -e $GUIDE
+echo "${guide}"
 
-
+# Environment variable:
 #EDITOR="nedit -create"
 EDITOR="emacs"
 
 export EDITOR
 
 echo
-echo "* First commenting galleries"
-find $rootDir -type d -a ! -name 'yag-osdl-resources' -exec ${HANDLE_GALLERY} '{}' 2>/dev/null ';'
+echo "* First: commenting galleries"
+find ${root_dir} -type d -a ! -name 'yag-osdl-resources' -exec ${handle_gallery} '{}' 2>/dev/null ';'
 
 echo
-echo "* Second commenting images"
-find $rootDir \( -name '*.jpeg' -o -name '*.jpg' -o -name '*.png' \) -a ! -name '*-thumbnail.jpeg' -exec ${HANDLE_IMAGE} '{}' ';'
+echo "* Second: commenting images"
+find ${root_dir} \( -name '*.jpeg' -o -name '*.jpg' -o -name '*.png' \) -a ! -name '*-thumbnail.jpeg' -exec ${handle_image} '{}' ';'
 
 echo "Annotations finished!"

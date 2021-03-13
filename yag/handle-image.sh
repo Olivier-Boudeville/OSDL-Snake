@@ -2,45 +2,47 @@
 
 # Helper script for annotate-images.sh
 
-if [ "$#" != "1" ] ; then
-	echo "handleImage.sh: error, $# arguments given instead of 1" 1>&2
-	exit 30
+if [ ! $# -eq 1 ]; then
+	echo "  $(basename $0): error, $# arguments given instead of 1." 1>&2
+	exit 10
 fi
 
 if [ ! -f "$1" ] ; then
-	echo "handleImage.sh: error, <$1> is not a file." 1>&2
-	exit 31
+	echo "  $(basename $0): error, '$1' is not a file." 1>&2
+	exit 11
 fi
 
-VIEWER_EXEC=$(which xv 2>/dev/null)
+#viewer_exec="$(which xv 2>/dev/null)"
+viewer_exec="$(which eog 2>/dev/null)"
 
-if [ -x "$VIEWER_EXEC" ]; then
-	IMAGE_VIEWER="${VIEWER_EXEC} -geometry 500"
+if [ -x "${viewer_exec}" ]; then
+	# Was for xv: image_viewer="${viewer_exec} -geometry 500"
+	image_viewer="${viewer_exec}"
 else
-	VIEWER_EXEC=$(which eog 2>/dev/null)
-	if [ -x "$VIEWER_EXEC" ]; then
-		IMAGE_VIEWER="${VIEWER_EXEC} -g"
+	viewer_exec=$(which geeqie 2>/dev/null)
+	if [ -x "${viewer_exec}" ]; then
+		image_viewer="${viewer_exec} -g"
 	else
-		echo "handleImage.sh: error, no image viewer found (tried xv and eog)." 1>&2
+		echo "  $(basename $0): error, no image viewer found (tried eog and geeqie)." 1>&2
 		exit 32
 	fi
 fi
 
-IMAGE_FILE="$1"
+image_file="$1"
 
-echo "    Showing $IMAGE_FILE"
-$IMAGE_VIEWER "$IMAGE_FILE" 1>/dev/null 2>&1 &
+echo "    Showing ${image_file}"
+${image_viewer} "${image_file}" 1>/dev/null 2>&1 &
 
 # Suppress everything after a point not followed by a .
 # (remove only the file extension, even if there are dots before)
-#BASE_NAME=`echo $IMAGE_FILE | sed 's|\..[^\.]$||g'`
+#base_name="$(echo ${image_file} | sed 's|\..[^\.]$||g')"
 
-IMAGE_DIRECTORY=$(dirname $IMAGE_FILE)
+image_directory="$(dirname ${image_file})"
 
-BEGIN_OF_NAME=$(basename $IMAGE_FILE | sed 's|\.|-|g')
+beginning_of_name="$(basename ${image_file} | sed 's|\.|-|g')"
 
 
-#echo "First part of name is <$BEGIN_OF_NAME>."
+#echo "First part of name is '${beginning_of_name}'."
 
-$EDITOR $IMAGE_DIRECTORY/$BEGIN_OF_NAME.txt
-$EDITOR $IMAGE_DIRECTORY/$BEGIN_OF_NAME.thm
+$EDITOR ${image_directory}/${beginning_of_name}.txt
+$EDITOR ${image_directory}/${beginning_of_name}.thm
