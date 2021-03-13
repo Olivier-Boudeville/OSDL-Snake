@@ -13,7 +13,7 @@ Typical use:
  6. ./run-yag-osdl.sh
  7. edit yag-overall-themes.thm to define the hierarchy between the previously defined themes
  8. ./run-yag-osdl.sh
- 9. copy the result at the root of your webserver of choice.
+ 9. copy the result at the root of your webserver of choice
 
 
 Themes are hierarchically organised. For example:
