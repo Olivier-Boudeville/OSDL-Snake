@@ -1,6 +1,6 @@
 [Options]
 
-# This must be a valid filename (no whitespace, no special character)
+# Now can be mostly any string:
 project_name          = My-Example
 
 # One may prefer absolute paths for simpler management.

@@ -12,7 +12,10 @@ FILES := $$(find $(PROJECT_NAME) ! \( -type d -a -name '.git' -prune \) -a -type
 YAG_ARCHIVE_ROOT = yag-osdl-$(PROJECT_VERSION)
 
 
-.PHONY : archive info
+.PHONY : all archive info
+
+
+all:
 
 
 archive:
