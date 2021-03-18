@@ -44,8 +44,10 @@ guide="
 echo "${guide}"
 
 # Environment variable:
-#EDITOR="nedit -create"
-EDITOR="emacs"
+if [ -z "${EDITOR}" ]; then
+	#EDITOR="nedit -create"
+	EDITOR="emacs"
+fi
 
 export EDITOR
 
