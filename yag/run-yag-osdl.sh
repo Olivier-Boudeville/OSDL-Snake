@@ -46,7 +46,7 @@ fi
 
 
 if [ ! -d "${CEYLAN_SNAKE}" ]; then
-	echo "  Error, non-existing CEYLAN_SNAKE directory (${CEYLAN_SNAKE})." 1>&2
+	echo "  Error, non-existing CEYLAN_SNAKE directory ('${CEYLAN_SNAKE}')." 1>&2
 	exit 60
 fi
 
