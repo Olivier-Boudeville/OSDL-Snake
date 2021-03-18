@@ -4,8 +4,8 @@
 # yag-osdl has three prerequesites:
 # - a not too ancient Python3 interpreter
 # - Ceylan-Snake generic Python scripts
-# - Python Imaging Library (PIL) [now managed thanks to pip and a virtual
-# - environment]
+# - Pillow (formerly the Python Imaging Library, PIL) [now managed thanks to pip
+# and a virtual environment]
 
 
 script_name="yag-osdl-environment.sh"
@@ -35,11 +35,11 @@ fi
 
 python_info="yag-osdl needs an executable python interpreter to be run. The interpreter can be downloaded from http://www.python.org/, yet your distribution should manage it first hand. Once available, update the PATH environment variable so that the interpreter (in version at least ${python_version}) can be found thanks to 'which python', and relaunch this script."
 
-python_interpreter=$(which python${python_version} 2>/dev/null)
+python_interpreter="$(which python${python_version} 2>/dev/null)"
 
-if [ ! -x ${python_interpreter} ]; then
+if [ ! -x "${python_interpreter}" ]; then
 
-	echo "Python interpreter not found in PATH in version ${python_version} (not found, nothing done). ${python_info}" 1>&2
+	echo "  Python interpreter not found in PATH in version ${python_version} (not found, nothing done). ${python_info}" 1>&2
 	return
 
 else
@@ -50,10 +50,10 @@ fi
 
 
 
-# Second: check for the Python Imaging Library (PIL)
+# Second: check for Pillow (formerly Python Imaging Library, PIL).
 # Disabled since using pip and a virtual env for that
-
-#pil_info="yag-osdl needs the Python Imaging Library (PIL) for its image handling features. It can be downloaded from: http://www.pythonware.com/products/pil/. Once available, either update pil_root in this script, or put it in your shell environment (for instance, export pil_root=<where it is installed>, such as export pil_root=/usr/lib/python${python_version}/site-packages/PIL). With gentoo, use 'emerge imaging', with Debian-based distributions use 'apt-get install python-imaging', with Arch Linux use 'pacman -S python-imaging'."
+# So not relevant anymore:
+#pil_info="yag-osdl needs the Pillow Library (PIL) for its image handling features. It can be downloaded from: http://www.pythonware.com/products/pil/. Once available, either update pil_root in this script, or put it in your shell environment (for instance, export pil_root=<where it is installed>, such as export pil_root=/usr/lib/python${python_version}/site-packages/PIL). With gentoo, use 'emerge imaging', with Debian-based distributions use 'apt-get install python-imaging', with Arch Linux use 'pacman -S python-imaging'."
 
 #if [ -z "${pil_root}" ]; then
 #
@@ -86,28 +86,37 @@ fi
 #fi
 
 
-# Third: check for the Ceylan scripts
+# Third: check for the Ceylan-Snake scripts
 
-ceylan_info="yag-osdl needs the Ceylan Library for its generic-purpose python scripts. It can be downloaded from: http://osdl.sourceforge.net. Once available, either update CEYLAN_ROOT in this script, or put it in your shell environment (for instance, export CEYLAN_ROOT=<where it is installed>, such as export CEYLAN_ROOT=${HOME}/Projects/LOANI-repository/ceylan/Ceylan."
+snake_info="yag-osdl needs the Ceylan-Snake library for its generic-purpose
+Python scripts. It can be cloned from
+https://github.com/Olivier-Boudeville/Ceylan-Snake.git.
 
-if [ -z "${CEYLAN_ROOT}" ]; then
+Once available, either update CEYLAN_SNAKE in this script, or set it in your
+shell environment (for instance, 'export CEYLAN_SNAKE=<where it is installed>',
+such as: 'export
+CEYLAN_SNAKE=${HOME}/Projects/LOANI-repository/ceylan/Ceylan-Snake'."
+
+if [ -z "${CEYLAN_SNAKE}" ]; then
 	# Change this setting according to the place where you installed Ceylan:
-	CEYLAN_ROOT="${HOME}/Projects/LOANI-repository/ceylan/Ceylan"
+	CEYLAN_SNAKE="${HOME}/Projects/LOANI-repository/ceylan/Ceylan-Snake"
+	echo "(defaulting to a Ceylan-Snake located in '${CEYLAN_SNAKE}')"
 fi
 
-if [ ! -d ${CEYLAN_ROOT} ]; then
+if [ ! -d ${CEYLAN_SNAKE} ]; then
 
-	echo "Ceylan not found, expected directory '${CEYLAN_ROOT}' does not exist (not found, nothing done). ${ceylan_info}" 1>&2
+	echo "  Ceylan-Snake not found, expected directory '${CEYLAN_SNAKE}' does not exist (not found, nothing done). ${snake_info}" 1>&2
 	return
 
 else
 
-	echo "    + Ceylan library found, using '${CEYLAN_ROOT}'."
+	echo "    + Ceylan-Snake library found, using '${CEYLAN_SNAKE}'."
 
-	# Needed to find Ceylan scripts (ex: toolbox.py):
-	export PYTHONPATH=${CEYLAN_ROOT}/trunk/src/code/scripts/python:${PYTHONPATH}
+	# Needed to find Ceylan-Snake scripts (ex: toolbox.py):
+	export PYTHONPATH=${CEYLAN_SNAKE}:${PYTHONPATH}
 
 	echo "Shell environment successfully set."
+
 fi
 
 # That's it!
