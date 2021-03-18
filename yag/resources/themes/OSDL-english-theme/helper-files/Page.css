@@ -1,14 +1,36 @@
 /* This document is a part of the OSDL Project */
 /* Standard Cascading Style Sheet File */
 
-/* Author : Olivier Boudeville (olivier.boudeville@online.fr) */
+
+/* Created: 24 May 2003 */
+
+/* Author: Olivier Boudeville (olivier (dot) boudeville (at) esperide (dot) com) */
+/* Updated: Michal Guerquin (michalg@gmail.com) */
+
+
+pre.code {
+	background: #403030;
+}
+
+
+.literal {
+  color: #e0ffe0;
+  font-weight: bold;
+}
+
+
+/* For command printouts: */
+.literal-block {
+  background: #403030;
+}
 
 
 div.box {
-  border: solid;
-  padding : 5px;
-  border-width: thin ;
+  color: #DADADA;
   background: #303030;
+  border: solid;
+  padding: 5px;
+  border-width: thin;
   text-align: left;
 }
 
@@ -20,49 +42,31 @@ div.centered {
 }
 
 
-/* green for an open poll */
-div.open {
-  font-family: courier;
-  color: #32CD32;
-
-}
-
-
-/* red for a closed one */
-div.closed {
-  font-family: courier;
-  color: #FF0000;
-
-}
-
-
-/* blue for a pending one */
-div.running {
-  font-family: courier;
-  color: #0000FF;
-
-}
-
 body {
+  color: #DFDFDF;
   background: #000000;
   font-family: arial, helvetica, sans-serif;
-  font-size: 16px;
-  text-indent: 4%;
+  font-size: 15px;
+  text-indent: 1%;
   text-align: left;
-  margin-left: 5%;
-  margin-right: 8%;
+  margin-left: 2%;
+  margin-right: 1%;
   margin-top: 2%;
   margin-bottom: 2%;
-  color: #DADADA;
 }
+
+
+/* At least most titles are hyperlinks, thus changing for example colors in h1,
+   h2, etc. is often useless.
+ */
 
 
 h1.Huge {
-  color: #9E9E9E ;
-  font-size: 70px;
+  color: #9E9E9E;
   background: transparent;
+  font-size: 70px;
   font-weight: bold;
-  font-family: Verdana;
+  font-family: Verdana, serif;
   margin-top: 0%;
   margin-bottom: 0;
   margin-left: 2%;
@@ -72,102 +76,124 @@ h1.Huge {
 
 
 h1.Big {
-  color: #9E9E9E ;
-  font-family: "Lucida Sans Unicode";
+  color: #9E9E9E;
+  font-family: "Lucida Sans Unicode", serif;
   font-size: 40px;
 }
 
 
+/* needs to leave room at the top for shortcut panel */
 h1 {
-  color: #FFFFFF;
-  font-size: 30px;
+  color: #ec8b23;
+  font-size: 35px;
   background: transparent;
   font-weight: bold;
-  font-family: "Lucida Sans Unicode", Verdana, "MS Sans Serif";
   text-align: center;
-  margin-top: 5%;
-  margin-bottom: 3%;
+  margin-top: 1%;
+  margin-bottom: 5%;
   margin-left: 2%;
   margin-right: 2%;
 }
 
 
 h2 {
-  color: #EFEFEF ;
-  font-size: 25px;
+  color: #2d702b;
+  font-size: 27px;
   background: transparent;
   text-align: left;
-  font-family: "Lucida Sans Unicode", Verdana, "MS Sans Serif";
-  margin-top: 5%;
-  margin-bottom: 5%;
+  margin-top: 3%;
+  margin-bottom: 1%;
 }
 
 
 h3 {
-  color: #DADADA;
-  font-size: 20px;
+  color: #72807b;
+  font-size: 22px;
   background: transparent;
-  font-family: "Lucida Sans Unicode", Verdana, "MS Sans Serif";
-  margin-top: 5%;
-  margin-bottom: 4%;
-  margin-left: 5%;
+  margin-top: 3%;
+  margin-bottom: 1%;
+  margin-left: 7%;
   margin-right: 4%;
 }
 
 
 h4 {
-  color : #AAAAAA;
-  font-size: 17px;
-  margin-left: 7%;
+  color: #8aa0d2;
+  font-size: 20px;
+  margin-left: 10%;
   margin-right: 7%;
-  font-family : "Lucida Sans Unicode", Verdana, "MS Sans Serif";
-  font-weight: normal;
-}
-
-
-h5 {
-  color : #9E9E9E;
-  font-size: 17px;
-  margin-left: 8%;
-  margin-right: 8%;
-  font-family : "Lucida Sans Unicode", Verdana, "MS Sans Serif";
   font-weight: bold;
 }
 
 
+h5 {
+  color: #ec8b23;
+  font-size: 16px;
+  margin-left: 15%;
+  margin-right: 15%;
+  font-weight: bold;
+  margin-top: 2%;
+  margin-bottom: 1%;
+}
+
+
+h6 {
+  color: #3da03b;
+  font-size: 15px;
+  margin-left: 30%;
+  margin-right: 5%;
+  font-weight: bold;
+  margin-top: 2%;
+  margin-bottom: 1%;
+}
+
+
+h7 {
+  color: #888888;
+  font-size: 15px;
+  margin-left: 10%;
+  margin-right: 5%;
+  font-weight: bold;
+  margin-top: 2%;
+  margin-bottom: 1%;
+}
+
+
 div.Visited {
-  font-size: 20px;
   color: #EFEFEF;
+  font-size: 20px;
 }
 
 
 dl {
-  margin-top: 2%;
+  color: #EFEFEF;
+  margin-top: 3%;
   margin-bottom: 1%;
   font-size: 16px;
   margin-left: 8%;
   text-align: left;
-  color: #EFEFEF;
   font-weight: bold;
   margin-right: 2%;
 }
 
 
 dt {
-  color: #EFEFEF;
+  color: #4dCC4b;
+  background: #363636;
   font-weight: bold;
+  text-indent: 5px;
+  line-height: 1.3;
   margin-left: 0%;
   margin-right: 0%;
   margin-top: 2%;
   margin-bottom: 1%;
-  background: #5E5E5E;
 }
 
 
 dd {
   font-size: 16px;
   font-weight: normal;
-  margin-bottom: 12px;
+  margin-bottom: 3%;
 }
 
 
@@ -184,41 +210,38 @@ p {
 ul {
   color: #EFEFEF;
   margin-top: 1%;
-  margin-bottom: 1%;
-  margin-left: 5%;
+  margin-left: 1%;
   text-align: left;
   list-style: square;
   margin-right: 0%;
 }
 
 
-/*
 ol {
   color: #EFEFEF;
   margin-top: 1%;
-  margin-bottom: 1%;
-  margin-left: 5%;
+  margin-left: 1%;
   text-align: left;
-  font-weight: bold;
   list-style: decimal;
   margin-right: 0%;
 }
-*/
 
 
 ul li {
   color: #DADADA;
+  margin-top: 1%;
+  margin-bottom: 1%;
   margin-left: 0%;
   margin-right: 0%;
-  list-style: square;
 }
 
 
 ol li {
   color: #DADADA;
-  margin-left: 5%;
+  margin-top: 1%;
+  margin-bottom: 1%;
+  margin-left: 0%;
   margin-right: 0%;
-  list-style: decimal;
 }
 
 
@@ -232,28 +255,22 @@ ul ul ul li {
 }
 
 
-dd ul li {
-  font-size: 16px;
-  font-weight: bold;
-  color: #BABABA;
-}
-
-
 pre {
-  color: #BABABA ;
-  font-family: monospace;
+  font-family: monospace, serif;
   margin-left: 4%;
   white-space: pre;
 }
 
 
 table {
-  color: #DADADA;
+  color: #000000;
   margin: 5px;
+  margin-top: 2%;
+  margin-bottom: 2%;
   border: solid;
   border-width: thin;
   border-collapse: separate;
-  border-spacing: 5pt;
+  border-spacing: 3pt;
 }
 
 
@@ -271,8 +288,64 @@ table p, table dl, ol p, ul p, dl p, blockquote p, .note p, .note ul, .note ol, 
 }
 
 
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em
+}
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+
 tr {
-   background : #000000;
    font-family: arial, helvetica, sans-serif;
    font-size: 15px;
    border:thin;
@@ -280,19 +353,19 @@ tr {
 
 
 th {
-   background : #000000;
-   color: #EFEFEF;
+   color: #8aa0d2;
    font-family: arial, helvetica, sans-serif;
    font-weight: bold;
    font-size: 19px;
    text-align: center;
- }
+}
 
 
 td {
-   background : #000000;
-   font-family: arial, helvetica, sans-serif;
-   font-size: 15px;
+	background: #505050;
+	font-size: 14px;
+	margin-top: 1%;
+	margin-bottom: 1%;
 }
 
 
@@ -306,8 +379,7 @@ p.top {
 blockquote {
   margin-left: 8%;
   margin-right: 8%;
-  border: thin ridge #FF0000;
-  /* border: thin ridge #B1B189;*/
+  border: thin ridge #555555;
 }
 
 
@@ -317,17 +389,37 @@ blockquote pre {
 }
 
 
+/* For code snippets in blockquotes: */
+
+.line {
+  font-family: monospace, serif;
+}
+
+
+.line-block {
+  font-family: monospace, serif;
+}
+
+
+
+a img {
+ border: none;
+ border-color: #FFFFFF;
+}
+
+
 dt a {
   font-weight: bold;
   color: #EFEFEF;
-  margin-top: .8em;
 }
+
 
 dt a:visited {
   font-weight: bold;
   color: #BABABA;
   margin-top: .8em;
 }
+
 
 td a {
   font-weight: bold;
@@ -336,7 +428,7 @@ td a {
 
 
 a:link {
-  color:#FFFFFF;
+  color:#8aa0d2;
   background: transparent;
   font-weight: bold;
   text-decoration: none;
@@ -345,34 +437,25 @@ a:link {
 
 
 a:visited {
-  color: #FFFFFF;
+  color: #7a8ebc;
   background: transparent;
   font-weight: bold;
-  text-decoration: none;
-}
-
-
-a:active {
-  color: #FFFFFF;
-  background: transparent;
-  font-weight: bold;
-  text-decoration: none;
+  text-decoration:none;
 }
 
 
 a:hover {
-  text-decoration:underline;
-  font-weight: bold;
-  color:#FFFFFF;
+  text-decoration: underline;
 }
 
 
 code {
-  color: #B5B5B5 ;
+  color: #B5B5B5;
   font-size: 17px;
   font-weight: normal;
-  font-family: Courier;
-  /* disabled :
+  font-family: Courier, serif;
+  background: #00FF00;
+  /* disabled:
   border-left-style: solid;
   border-left-width: 3px;
   border-right-style: none;
@@ -383,36 +466,36 @@ code {
 
 
 b {
-  color: #EFEFEF;
-  font-family: "Lucida Sans Unicode", Verdana, "MS Sans Serif";
-  font-size: 18px;
+  color: #ec8b23;
+  font-size: 16px;
   font-weight: bold;
 }
 
 
 /* Taken from http://www.w3.org/Style/Examples/007/menus.html */
+
 div.banner {
-  margin: 0;
   background: #A0A0A0;
-  font-size: 80% ;
+  margin: 0;
+  font-size: 70%;
   font-weight: bold;
-  line-height: 1;
+  line-height: 1.0;
   text-align: center;
   position: fixed;
   top: 1em;
   left: auto;
-  width: 10em;
+  width: 11em;
   right: 1em;
 }
 
 
 div.banner p {
+  color: #900000;
+  background: #808080;
   margin-left: 0em;
   padding:  0em;
   font-family: Arial, sans-serif;
-  background: #808080;
   border: thin outset #AAAAAA;
-  color: #900;
   margin-top: 0%;
   margin-bottom: 0%;
   margin-left: 0%;
@@ -421,10 +504,10 @@ div.banner p {
 
 
 div.banner a, div.banner em { display: block; margin: 0em; }
-div.banner a, div.banner em { border-top: 2px groove #EEEEEE; } /* separator */
+div.banner a, div.banner em { border-top: 1px groove #EEEEEE; } /* separator */
 div.banner a:first-child { border-top: none; }
 div.banner em { color: #FFFFFF; font-weight: bold; } /* head of column */
 
-div.banner a:link { text-decoration: none; color: #EEEEEE; }
-div.banner a:visited { text-decoration: none; color: #CCCCCC; }
-div.banner a:hover { background: #000000; color: #FFFFFF; }
+div.banner a:link { color: #EEEEEE; text-decoration: none;  }
+div.banner a:visited { color: #CCCCCC; text-decoration: none;  }
+div.banner a:hover { color: #FFFFFF; background: #000000; }
