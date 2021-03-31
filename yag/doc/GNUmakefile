@@ -1,5 +1,8 @@
 
-.PHONY: all html pdf info
+.PHONY: doc all full-doc create-links html pdf clone-mirror          \
+		export-doc export-to-official export-to-mirror               \
+	   clean clean-doc clean-links info info-web
+
 
 DOC_BASE_NAME := yag-osdl
 
@@ -92,7 +95,19 @@ export-to-mirror: create-links $(DOC_GENERATED_FILES)
 	@/bin/cp -f $(WEB_CONTENT) $(OSDL_SNAKE_WEB_MIRROR_BRANCH) && cd $(OSDL_SNAKE_WEB_MIRROR_BRANCH) && git add . && git merge -s ours && git commit -m "YAG-OSDL doc updated." && git push && git pull --ff-only
 
 
+clean: clean-doc
+
+clean-doc: clean-links
+	@echo "     Cleaning documentation"
+	-@/bin/rm -f *.aux *.log *.maf *.mtc* *.stc* *.tex *.toc $(DOC_GENERATED_FILES)
+
+
+clean-links:
+	-@/bin/rm -f index.html
+
+
 info: info-web
+	@echo "MYRIAD_TOP = $(MYRIAD_TOP)"
 
 
 info-web:
@@ -103,7 +118,3 @@ info-web:
 	@echo "WEB_ROOT = $(WEB_ROOT)"
 	@echo "OSDL_SNAKE_WEB_MIRROR_BRANCH = $(OSDL_SNAKE_WEB_MIRROR_BRANCH)"
 	@echo "GITHUB_PAGES_BASE = $(GITHUB_PAGES_BASE)"
-
-
-info:
-	@echo "MYRIAD_TOP = $(MYRIAD_TOP)"
