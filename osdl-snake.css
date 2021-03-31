@@ -9,7 +9,7 @@
 
 
 pre.code {
-	background: #403030;
+	background: #303535;
 }
 
 
@@ -209,7 +209,7 @@ p {
 
 ul {
   color: #EFEFEF;
-  margin-top: 1%;
+  margin-top: 0%;
   margin-left: 1%;
   text-align: left;
   list-style: square;
@@ -229,8 +229,8 @@ ol {
 
 ul li {
   color: #DADADA;
-  margin-top: 1%;
-  margin-bottom: 1%;
+  margin-top: 0%;
+  margin-bottom: 0%;
   margin-left: 0%;
   margin-right: 0%;
 }
@@ -263,7 +263,7 @@ pre {
 
 
 table {
-  color: #000000;
+  color: #dedede;
   margin: 5px;
   margin-top: 2%;
   margin-bottom: 2%;
@@ -362,7 +362,7 @@ th {
 
 
 td {
-	background: #505050;
+	background: #000000;
 	font-size: 14px;
 	margin-top: 1%;
 	margin-bottom: 1%;
@@ -484,7 +484,7 @@ div.banner {
   position: fixed;
   top: 1em;
   left: auto;
-  width: 11em;
+  width: 12em;
   right: 1em;
 }
 
