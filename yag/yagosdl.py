@@ -93,7 +93,7 @@ import data_utils
 
 
 
-yag_osdl_version = 0.8
+yag_osdl_version = 1.1
 
 yag_general_theme_file = 'yag-overall-themes.thm'
 yag_general_theme_page = 'yag-theme-map.html'
@@ -191,14 +191,14 @@ class NodeTheme(data_utils.Node):
                 else:
                     res += u'This theme has ony one sub-theme: <a href="%s">%s</a>' % (convert_theme_to_filename(self.children[0].get_name()), self.children[0].get_name())
             else:
-                 if main_dic['language'] == 'French':
-                     res += u'Ce thème inclut les sous-thèmes suivants :\n<ul>'
-                 else:
-                     res += u'This theme has following sub-themes:\n<ul>'
+                if main_dic['language'] == 'French':
+                    res += u'Ce thème inclut les sous-thèmes suivants :\n<ul>'
+                else:
+                    res += u'This theme has following sub-themes:\n<ul>'
 
-                 for c in self.get_children():
-                     res += '\t<li><a href="%s">%s</a></li>' % (convert_theme_to_filename(c.get_name()), c.get_name())
-                     res += "</ul>"
+                for c in self.get_children():
+                    res += '\t<li><a href="%s">%s</a></li>' % (convert_theme_to_filename(c.get_name()), c.get_name())
+                res += "</ul>"
         else:
             if main_dic['language'] == 'French':
                 res += u'Ce thème ne comporte aucun sous-thème.'
@@ -573,6 +573,8 @@ def generate_all_theme_pages():
     token_dic['YAG-OSDL-TOKEN-ROOT-PATH'] = ".."
 
     theme_list = main_dic['themes'].list_depth_first()
+    #output_device.info('Found %s themes: %s' % (len(theme_list),theme_list))
+
     for theme in theme_list:
         generate_theme_pages(theme)
 
@@ -585,7 +587,7 @@ def generate_all_theme_pages():
 
 def generate_theme_pages(theme):
     """ Generates page for specified theme."""
-    #output_device.info('Generating page for theme '%s'." % (theme.get_name(),))
+    #output_device.info("Generating page for theme '%s'." % (theme.get_name(),))
     template_dir = main_dic['template_directory']
 
     header_theme_path = os.path.join(template_dir, 'header-theme.template.html')
@@ -601,7 +603,7 @@ def generate_theme_pages(theme):
     footer_theme_path = os.path.join(template_dir, 'footer-theme.template.html')
 
     with open(footer_theme_path, 'r', encoding=yag_encoding) as f:
-        content = f.read()
+        content += f.read()
 
     token_dic['YAG-OSDL-CURRENT-THEME'] = theme.get_name()
     content = update_from_token_dic(content)
@@ -748,7 +750,7 @@ def handle_menu_name(menu_name):
     else:
         return menu_name.replace('-', ' ')
 
-    
+
 
 def generate_menu_for_dir(root_level):
     """Generates menu frame file for a directory."""
@@ -796,7 +798,7 @@ def generate_menu_for_dir(root_level):
 
         text_three= '</a></td>\n<td width="15"><a href="'
 
-        text_four = update_from_token_dic('"<img src="YAG-OSDL-TOKEN-ROOT-PATH/yag-osdl-resources/Arrow.png" border="0" alt=""></a></td>\n</tr>\n')
+        text_four = update_from_token_dic('"><img src="YAG-OSDL-TOKEN-ROOT-PATH/yag-osdl-resources/Arrow.png" border="0" alt=""></a></td>\n</tr>\n')
 
         for d in directories:
             if d not in [resource_directory_name, theme_directory_name]:
@@ -845,6 +847,11 @@ def generate_overview(graphics, page_count, total_page_count, comment, root_leve
                 f.write(u'<p>Select in the left panel your preferred browsing scheme and any gallery you want to display.</p>')
 
         if not managed:
+            if main_dic['language'] == 'French':
+                f.write(u"<p>Cette galerie n'a pas de contenu en propre. Vous pouvez sélectionnez dans le menu de gauche toute sous-galerie disponible, ou remonter dans l'arborescence, ou changer le mode de navigation.</p>")
+            else:
+                f.write(u'<p>This gallery has no content of its own. You can select in the left panel any available sub-gallery, or select any parent gallery, or switch browsing scheme.</p>')
+
             f.write(update_from_token_dic(footer_content))
             return
 
@@ -935,8 +942,8 @@ def generate_overview(graphics, page_count, total_page_count, comment, root_leve
 
                         comment_filepath = os.path.join(token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY'], convert_into_filename(img_filename) + comment_extension)
                         if os.path.isfile(comment_filepath):
-                            with open(comment_filepath, 'r', encoding=yag_encoding) as f:
-                                comment = f.read()
+                            with open(comment_filepath, 'r', encoding=yag_encoding) as fc:
+                                comment = fc.read()
                             if comment.strip():
                                 to_write = '<img src="' + os.path.join(token_dic['YAG-OSDL-TOKEN-ROOT-PATH'], resource_directory_name, 'comment.png') + '" width="16" alt="[C]"></img> '
                                 f.write(to_write)
@@ -1021,7 +1028,7 @@ def process_dir(root_level):
 
     if os.path.isfile(comment_filepath):
         with open(comment_filepath, 'r', encoding=yag_encoding) as f:
-            gallery_comment = f().read()
+            gallery_comment = f.read()
 
     generate_overview(graphics, 0, None, gallery_comment, root_level)
 
@@ -1029,7 +1036,7 @@ def process_dir(root_level):
 
 def scan_content(content_dir, output_dir, root_path):
     """Scans content from specified directory. Will be first called with only
-    one argument, then will recursing will add a second order, to keep track of
+    one argument, then while recursing will add a second order, to keep track of
     base directory.
     """
     output_device.debug("Scanning from content directory '%s', will write in '%s', with root directory being '%s'..." % (content_dir, output_dir, root_path))
@@ -1162,7 +1169,7 @@ def main(content_dir=None, config_filename=None):
             'output_in_content'    : "False",
             'output_directory'     : os.path.join(current_dir, 'output'),
             'language'             : 'English',
-            'theme'                : 'Default-theme',
+            'theme'                : 'default-theme',
             'thumbsize'            : '60',
             'images_by_row'        : '3',
             'images_by_column'     : '3',
@@ -1273,6 +1280,11 @@ def main(content_dir=None, config_filename=None):
     scan_content(content_dir, output_dir, root_path)
 
     token_dic['YAG-OSDL-TOKEN-MENU'] = os.path.join(output_dir, os.path.basename(output_dir))  + 'Menu' + html_extension
+
+    # Reset after scan, for the last generations:
+    token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY'] = content_dir
+    token_dic['YAG-OSDL-TOKEN-OUTPUT-DIRECTORY']  = output_dir
+    token_dic['YAG-OSDL-TOKEN-ROOT-PATH']         = root_path
 
     install_helper_files()
     generate_loading_page()
