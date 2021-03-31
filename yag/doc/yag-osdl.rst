@@ -28,13 +28,13 @@ YAG-OSDL Homepage
 :Organisation: Copyright (C) 2004-2021 Olivier Boudeville
 :Contact: about (dash) yag-osdl (at) esperide (dot) com
 :Creation date: Sunday, August 17, 2008
-:Lastly updated: Sunday, March 14, 2021
+:Lastly updated: Wednesday, March 31, 2021
 :Status: Stable
-:Version: 0.8.0
+:Version: 1.1.4
 :Dedication: Users of the ``YAG-OSDL`` tool.
 :Abstract:
 
-   The role of `YAG-OSDL <http://snake.esperide.org/yag-osdl.html/>`_ is to generate static HTML galleries out of a filesystem tree containing snapshots (camera pictures).
+   The role of `YAG-OSDL <http://snake.esperide.org/yag-osdl.html/>`_ is to generate static HTML galleries out of a filesystem tree containing snapshots (camera pictures). See `this website <https://osdl-data.esperide.org>`_ for an example of YAG-OSDL in action.
 
    Browsing this content can be done according to the tree structure (per gallery, through which one can navigate and that can be nested, each with subgalleries containing thumbnails) or based on themes that themselves form a separate hierarchy (any theme may be further split into subthemes recursively).
 
@@ -47,6 +47,18 @@ YAG-OSDL Homepage
    :keywords: OSDL-Snake, YAG, YAG-OSDL, gallery, HTML
 
 
+:raw-latex:`\pagebreak`
+
+
+
+.. _`table of contents`:
+
+
+.. contents:: Table of Contents
+  :depth: 2
+
+
+
 
 --------
 Overview
@@ -54,7 +66,7 @@ Overview
 
 **YAG-OSDL** is a GPL'd cross-platform tool whose purpose is to generate a static website from a set of image files stored in a directory tree, in order to build a full web gallery allowing to browse the pictures pleasantly afterwards, based on navigation options and thumbnails.
 
-Hierarchical thematical sort and comments are supported (see an older `example of result <http://osdl-data.esperide.org>`_).
+Hierarchical thematical sort and comments are supported; see an `example of result <http://osdl-data.esperide.org>`_.
 
 
 
@@ -128,11 +140,12 @@ Step zero (optional): prepare the snapshots
 
 One may take advantage of the `relevant scripts in Ceylan-Hull <https://hull.esperide.org/#for-snapshots-camera-pictures>`_ in order to better manage pictures, namely to fix their filenames as a whole (see ``rename-snapshots.sh`` for that) and to remove any associated metadata (typically EXIF information) before publishing (not to disclose timestamps, locations, etc.), thanks to ``remove-snapshot-metadata.sh``.
 
-One may then, once these metadata have been applied (images having been made upright) and cleared, correct the orientation (as some camera mess with them) of the remaining pictures that need it.
 
-For that, one may use ``ImageMagick`` for that, precisely:
+.. _orientation:
 
-.. code:: bash
+One may then, once these metadata have been applied (images having been made upright) and cleared, correct the **orientation** (as some camera mess with them) of the remaining pictures that need it.
+
+For that, one may use ``ImageMagick`` for that, precisely::
 
   # Counter-clockwise, in-place rotation:
   $ mogrify -rotate "-90" foobar.jpeg
@@ -159,16 +172,12 @@ Ceylan-Snake
 
 ``YAG-OSDL`` belongs to ``OSDL-Snake``, which relies on ``Ceylan-Snake``.
 
-This is just a matter of:
-
-.. code:: bash
+This is just a matter of::
 
    $ cd ~/my-projects
    $ git clone https://github.com/Olivier-Boudeville/Ceylan-Snake
 
-Set in your environment a ``CEYLAN_SNAKE`` variable pointing to that clone; ex:
-
-.. code:: bash
+Set in your environment a ``CEYLAN_SNAKE`` variable pointing to that clone; ex::
 
    $ export CEYLAN_SNAKE="${HOME}/my-projects/Ceylan-Snake"
 
@@ -177,17 +186,13 @@ Set in your environment a ``CEYLAN_SNAKE`` variable pointing to that clone; ex:
 YAG-OSDL itself
 ---------------
 
-Then obtain the YAG-OSDL codebase thanks to, for example:
-
-.. code:: bash
+Then obtain the YAG-OSDL codebase thanks to, for example::
 
    $ cd ~/my-projects
    $ git clone https://github.com/Olivier-Boudeville/OSDL-Snake
    $ cd OSDL-Snake
 
-Then the needed Python3 packages, which are listed in `requirements.txt  <https://github.com/Olivier-Boudeville/OSDL-Snake/yag/requirements.txt>`_, can be installed with:
-
-.. code:: bash
+Then the needed Python3 packages, which are listed in `requirements.txt  <https://github.com/Olivier-Boudeville/OSDL-Snake/yag/requirements.txt>`_, can be installed with::
 
  $ python3 -m pip install -r requirements.txt
 
@@ -198,43 +203,39 @@ This only involves installing actually ``Pillow`` (which supersedes ``PIL``).
 Step two: edit your YAG-OSDL configuration file
 ===============================================
 
-Simplest solution is to derive it from the sample one:
-
-.. code:: bash
+Simplest solution is to derive it from the sample one::
 
   $ cp yag-osdl.conf.sample yag-osdl-for-foobar.conf
 
 
-We hope that the sample is self-describing enough for most uses; yours could be edited that way:
-
-.. code:: ini
+We hope that `this sample <https://github.com/Olivier-Boudeville/OSDL-Snake/blob/master/yag/yag-osdl.conf.sample>`_ is self-describing enough for most uses; yours could be edited that way::
 
  [Options]
 
  # Now can be mostly any string:
- project_name          = Moon Photos
+ project_name = Moon Photos
 
  # One may prefer absolute paths for simpler management.
 
- content_directory     = /var/my-encrypted-storage/www/Moon-sources
- #resource_directory    = /home/dalton/Projects/Tools/yag/yag-osdl-latest/resources
+ content_directory = /var/my-encrypted-storage/www/Moon-sources
+ #resource_directory = /home/dalton/Projects/Tools/yag/yag-osdl-latest/resources
 
- output_in_content     = False
- output_directory      = /var/my-encrypted-storage/www/Moon
+ output_in_content = False
+ output_directory = /var/my-encrypted-storage/www/Moon
 
  #language = English
  language = French
 
- #theme                 = OSDL-english-theme
- theme                 = OSDL-french-theme
+ #theme = OSDL-english-theme
+ theme = OSDL-french-theme
 
- thumbsize             = 120
- images_by_row         = 4
- images_by_column      = 4
+ thumbsize = 120
+ images_by_row = 4
+ images_by_column = 4
  dash_is_space_in_menu = True
 
- author                = William Dalton
- author_mail           = william.dalton@maverick.org
+ author = William Dalton
+ author_mail = william.dalton@maverick.org
 
 
 
@@ -248,9 +249,7 @@ To Trigger the Annotation Process
 
 If we launch YAG-OSDL now, a full gallery will be generated, yet no comment nor theme information will be available.
 
-If one wants to provide them, just enter, for example, from the OSDL-Snake root:
-
-.. code:: bash
+If one wants to provide them, just enter, for example, from the OSDL-Snake root::
 
   $ MY_CONTENT_ROOT="/var/my-encrypted-storage/www/Moon-sources"
   $ ./annotate-images.sh ${MY_CONTENT_ROOT}
@@ -314,7 +313,8 @@ There is an alternative or complementary method in order to define your theme tr
 
 .. [#] Knowing that a given father/child theme relationship can be specified only once, at the level of any related content.
 
-as shown here::
+
+For example::
 
  Awful activities: sailing
  Awful activities: surf
@@ -334,9 +334,7 @@ However, any combination of theme specifications will work: one can both use ima
 Step four: launch YAG-OSDL
 ==========================
 
-Still following the example, one just have to run:
-
-.. code:: bash
+Still following the example, one just have to run::
 
   $ run-yag-osdl.sh --config yag-osdl-for-foobar.conf
 
@@ -357,6 +355,45 @@ Step five: admire the result
 ============================
 
 Use your browser to inspect your stunning new gallery, improve comments and themes if necessary and, if you feel like it should be put online, copy the whole content directory to a webserver, add a link to the gallery main page and tell all your friends about it!
+
+
+
+---------------
+Troubleshooting
+---------------
+
+
+Some thumbnails and/or snapshots are not properly oriented
+==========================================================
+
+The corresponding original snapshots shall be rotated, refer to the orientation_ section.
+
+
+UnicodeDecodeError when running YAG-OSDL
+========================================
+
+Precisely::
+
+  UnicodeDecodeError: 'utf-8' codec can't decode byte 0x## in position P
+
+This error happens as the various text files involved (ex: to describe themes, to comment snapshots, etc.) shall contain UTF-8 Unicode text, otherwise pure ASCII text (ex: not ISO-8859 text).
+
+If needed, one may thus have to convert them, possibly thanks to our `switch-text-encoding.sh <https://github.com/Olivier-Boudeville/Ceylan-Hull/blob/master/switch-text-encoding.sh>`_ script, before running again YAG-OSDL.
+
+For example::
+
+ $ find . -name '*.txt' -exec switch-text-encoding.sh '{}' utf-8 ';'
+
+
+
+
+------------
+Known Issues
+------------
+
+- when switching between a content-based or a theme-based browsing (typically through the left menu), on Firefox a white transition flashes once; not a big issue
+
+
 
 
 .. _`free software`:
