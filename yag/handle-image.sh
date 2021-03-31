@@ -12,7 +12,9 @@ if [ ! -f "$1" ] ; then
 	exit 11
 fi
 
-# A viewer: is an executable possibly with options:
+# A viewer is an executable, possibly with options:
+# (this variable may have been set by the user)
+#
 if [ -n "${IMAGE_VIEWER}" ] && [ -x "${IMAGE_VIEWER}" ]; then
 
 	image_viewer="${IMAGE_VIEWER}"
@@ -22,7 +24,7 @@ else
 	#image_exec="$(which xv 2>/dev/null)"
 	image_exec="$(which eog 2>/dev/null)"
 
-	if [ ! -x "${image_exec}" ]; then
+	if [ -x "${image_exec}" ]; then
 
 		# Was for xv: image_viewer="${viewer_exec} -geometry 500"
 		image_viewer="${image_exec}"
@@ -45,6 +47,7 @@ fi
 image_file="$1"
 
 echo "    Showing ${image_file}"
+#echo ${image_viewer} "${image_file}"
 ${image_viewer} "${image_file}" 1>/dev/null 2>&1 &
 
 # Suppress everything after a point not followed by a .
@@ -58,5 +61,23 @@ beginning_of_name="$(basename ${image_file} | sed 's|\.|-|g')"
 
 #echo "First part of name is '${beginning_of_name}'."
 
-${EDITOR} "${image_directory}/${beginning_of_name}.txt"
-${EDITOR} "${image_directory}/${beginning_of_name}.thm"
+comment_file="${image_directory}/${beginning_of_name}.txt"
+
+if [ ! -f "${comment_file}" ]; then
+
+	echo "# Replace this text with *comments* regarding content '${image_file}'." > "${comment_file}"
+
+fi
+
+${EDITOR} "${comment_file}"
+
+
+theme_file="${image_directory}/${beginning_of_name}.thm"
+
+if [ ! -f "${theme_file}" ]; then
+
+	echo "# Replace this text with *theme information* regarding content '${image_file}'." > "${theme_file}"
+
+fi
+
+${EDITOR} "${theme_file}"

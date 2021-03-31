@@ -39,11 +39,11 @@ if [ ! -x "${handle_image}" ]; then
 fi
 
 guide="
-	This script will recursively scan root directory <${root_dir}> and, for each gallery location and encountered image (X.jpeg or X.png), will show it to you, and will allow you to edit first a comment for it (creating X.txt), then a theme list (creating X.thm)."
+	This script will recursively scan root directory '${root_dir}' and, for each gallery location and then for each encountered image (X.jpeg or X.png), will show it to you, and will allow you to edit first a comment for it (creating X.txt), then a theme list (creating X.thm)."
 
 echo "${guide}"
 
-# Environment variable:
+# Environment variable possibly set by the user:
 if [ -z "${EDITOR}" ]; then
 	#EDITOR="nedit -create"
 	EDITOR="emacs"
@@ -51,12 +51,15 @@ fi
 
 export EDITOR
 
-echo
-echo "* First: commenting galleries"
-find ${root_dir} -type d -a ! -name 'yag-osdl-resources' -exec ${handle_gallery} '{}' 2>/dev/null ';'
+# Later: auto-remove lines starting with '#', and auto-remove the comment/theme
+# files then empty.
 
 echo
-echo "* Second: commenting images"
-find ${root_dir} \( -name '*.jpeg' -o -name '*.jpg' -o -name '*.png' \) -a ! -name '*-thumbnail.jpeg' -exec ${handle_image} '{}' ';'
+echo "* First: commenting galleries as a whole"
+find ${root_dir} -type d -a ! -name 'yag-osdl-resources' -a ! -name 'yag-osdl-parsed-themes' -exec ${handle_gallery} '{}' 2>/dev/null ';'
 
-echo "Annotations finished!"
+echo
+echo "* Second: commenting individual images"
+find ${root_dir} -path ${root_dir}/yag-osdl-resources -prune -o \( -name '*.jpeg' -o -name '*.jpg' -o -name '*.png' \) -a ! -name '*-thumbnail.jpeg' -exec ${handle_image} '{}' ';'
+
+echo "Annotations finished! Now if you run YAG-OSDL these addition information will be automatically integrated."

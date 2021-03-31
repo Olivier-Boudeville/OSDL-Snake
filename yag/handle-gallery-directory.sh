@@ -21,4 +21,12 @@ echo " - please describe now the gallery '${gallery_name}'..."
 
 gallery_comment_filename="yag-gallery-comment.txt"
 
-$EDITOR "${gallery_directory}/${gallery_comment_filename}"
+gallery_comment_file="${gallery_directory}/${gallery_comment_filename}"
+
+if [ ! -f "${gallery_comment_file}" ]; then
+
+	echo "# Replace this text with *comments* regarding the gallery in '${gallery_directory}'." > "${gallery_comment_file}"
+
+fi
+
+${EDITOR} "${gallery_comment_file}"
