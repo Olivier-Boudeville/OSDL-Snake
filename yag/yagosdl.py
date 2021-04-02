@@ -669,9 +669,9 @@ def generate_full_page_for_graphic(prev_filename, graphic_filename, next_filenam
     if os.path.isfile(comment_path):
         #output_device.info("Using comment file '%s'." % (comment_path,))
         with open(comment_path, 'r', encoding=yag_encoding) as f:
-            comment = f.read()
-        if comment.strip():
-            content += '<br><br><p><img src="' + os.path.join(direct_theme_dir, 'comment.png') + '" alt="[Comment]" width="16"></img> ' + comment + '</p><br><br>'
+            comment_lines = [l.strip() for l in f.readlines() if l[0] != '#' and l[0] != '\n']
+        if comment_lines:
+            content += '<br><br><p><img src="' + os.path.join(direct_theme_dir, 'comment.png') + '" alt="[Comment]" width="16"></img> ' + "\n".join(comment_lines) + '</p><br><br>'
     else:
         #output_device.debug("No comment file found (tried '%s')." % (comment_path,))
         pass
@@ -682,7 +682,9 @@ def generate_full_page_for_graphic(prev_filename, graphic_filename, next_filenam
     if os.path.isfile(theme_path):
         #output_device.info("Using theme file '%s'." % (theme_path,))
         with open(theme_path, 'r', encoding=yag_encoding) as f:
-            themes_with_eof = f.readlines()
+            themes_with_eof = [l.strip() for l in f.readlines() if l[0] != '#' and l[0] != '\n']
+
+        # No-op?
         decoded_themes= [th for th in themes_with_eof]
         themes = []
         for t in decoded_themes:
@@ -868,6 +870,8 @@ def generate_overview(graphics, page_count, total_page_count, comment, root_leve
             to_write = '<br><br><p><img src="' + os.path.join(token_dic['YAG-OSDL-TOKEN-ROOT-PATH'], resource_directory_name, 'comment.png') + '" width="16" alt="[C]"></img> ' + comment + '</p><br><br>'
             f.write(to_write)
 
+        f.write("<center>")
+
         if total_page_count > 1:
             if page_count == 0:
                 if main_dic['language'] == 'French':
@@ -943,10 +947,13 @@ def generate_overview(graphics, page_count, total_page_count, comment, root_leve
                         comment_filepath = os.path.join(token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY'], convert_into_filename(img_filename) + comment_extension)
                         if os.path.isfile(comment_filepath):
                             with open(comment_filepath, 'r', encoding=yag_encoding) as fc:
-                                comment = fc.read()
-                            if comment.strip():
+                                comment_lines = [l for l in fc.readlines() if l[0] != '#']
+                            if comment_lines:
                                 to_write = '<img src="' + os.path.join(token_dic['YAG-OSDL-TOKEN-ROOT-PATH'], resource_directory_name, 'comment.png') + '" width="16" alt="[C]"></img> '
                                 f.write(to_write)
+                                comment = "".join(comment_lines)
+                            else:
+                                comment = None
 
                         thm_filepath = os.path.join(token_dic['YAG-OSDL-TOKEN-CONTENT-DIRECTORY'], convert_into_filename(img_filename) + theme_extension)
                         if os.path.isfile(thm_filepath):
@@ -969,7 +976,7 @@ def generate_overview(graphics, page_count, total_page_count, comment, root_leve
                 to_write = '<li>[<a href="' + convert_into_filename(g) + '.html">' + g + '</a>]</li>'
                 f.write(to_write)
 
-            f.write('</ul></p>')
+            f.write('</ul></p></center>')
             f.write(update_from_token_dic(footer_content))
 
         if remainder:
@@ -1028,7 +1035,11 @@ def process_dir(root_level):
 
     if os.path.isfile(comment_filepath):
         with open(comment_filepath, 'r', encoding=yag_encoding) as f:
-            gallery_comment = f.read()
+            gallery_comment_lines = [l.strip() for l in f.readlines() if l[0] != '#' and l[0] != '\n']
+            if gallery_comment_lines:
+                gallery_comment = "\n".join(gallery_comment_lines)
+            else:
+                 gallery_comment = None
 
     generate_overview(graphics, 0, None, gallery_comment, root_level)
 
@@ -1346,13 +1357,16 @@ if __name__ == '__main__':
 
     if len(sys.argv) > 1 and sys.argv[1] not in all_opts:
         content_dir = sys.argv[1]
+        print("Content directory: '%s'." % (content_dir,))
+        if not os.path.isdir(content_dir):
+            raise YagException("Content directory specified in the command-line, '%s', does not exist. Forgot the --config option tag?" % (content_dir,))
         option_start = 2
 
     item_count = option_start
 
     for item in sys.argv[option_start:]:
 
-        #print("Examining argument '%s'." % (item,)
+        #print("Examining argument '%s'." % (item,))
         item_count += 1
 
         if item in help_opts:
