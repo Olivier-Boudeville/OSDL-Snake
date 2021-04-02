@@ -31,13 +31,13 @@
 <tr class="field"><th class="field-name">Creation date:</th><td class="field-body"><p class="first">Sunday, August 17, 2008</p>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Lastly updated:</th><td class="field-body"><p class="first">Wednesday, March 31, 2021</p>
+<tr class="field"><th class="field-name">Lastly updated:</th><td class="field-body"><p class="first">Friday, April 2, 2021</p>
 </td>
 </tr>
 <tr class="field"><th class="field-name">Status:</th><td class="field-body"><p class="first">Stable</p>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Version:</th><td class="field-body"><p class="first">1.1.4</p>
+<tr class="field"><th class="field-name">Version:</th><td class="field-body"><p class="first">1.1.5</p>
 </td>
 </tr>
 <tr class="field"><th class="field-name">Dedication:</th><td class="field-body"><p class="first">Users of the <tt class="docutils literal"><span class="pre">YAG-OSDL</span></tt> tool.</p>
@@ -60,12 +60,25 @@
 <li><a class="reference internal" href="#purpose-of-yag-osdl" id="id12">Purpose of YAG-OSDL</a></li>
 <li><a class="reference internal" href="#installation" id="id13">Installation</a></li>
 <li><a class="reference internal" href="#inspiration" id="id14">Inspiration</a></li>
-<li><a class="reference internal" href="#step-by-step-mini-user-s-guide" id="id15">Step-by-step Mini User's Guide</a></li>
-<li><a class="reference internal" href="#troubleshooting" id="id16">Troubleshooting</a></li>
-<li><a class="reference internal" href="#known-issues" id="id17">Known Issues</a></li>
-<li><a class="reference internal" href="#licence" id="id18">Licence</a></li>
-<li><a class="reference internal" href="#support" id="id19">Support</a></li>
-<li><a class="reference internal" href="#please-react" id="id20">Please React!</a></li>
+<li><a class="reference internal" href="#step-by-step-mini-user-s-guide" id="id15">Step-by-step Mini User's Guide</a><ul>
+<li><a class="reference internal" href="#objective" id="id16">Objective</a></li>
+<li><a class="reference internal" href="#step-zero-optional-prepare-the-snapshots" id="id17">Step zero (optional): prepare the snapshots</a></li>
+<li><a class="reference internal" href="#step-one-install-the-yag-osdl-tooling" id="id18">Step one: install the YAG-OSDL tooling</a></li>
+<li><a class="reference internal" href="#step-two-edit-your-yag-osdl-configuration-file" id="id19">Step two: edit your YAG-OSDL configuration file</a></li>
+<li><a class="reference internal" href="#step-three-annotate-the-images-thanks-to-our-helper-scripts" id="id20">Step three: annotate the images, thanks to our helper scripts</a></li>
+<li><a class="reference internal" href="#step-four-launch-yag-osdl" id="id21">Step four: launch YAG-OSDL</a></li>
+<li><a class="reference internal" href="#step-five-admire-the-result" id="id22">Step five: admire the result</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#troubleshooting" id="id23">Troubleshooting</a><ul>
+<li><a class="reference internal" href="#some-thumbnails-and-or-snapshots-are-not-properly-oriented" id="id24">Some thumbnails and/or snapshots are not properly oriented</a></li>
+<li><a class="reference internal" href="#unicodedecodeerror-when-running-yag-osdl" id="id25">UnicodeDecodeError when running YAG-OSDL</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#known-issues" id="id26">Known Issues</a></li>
+<li><a class="reference internal" href="#licence" id="id27">Licence</a></li>
+<li><a class="reference internal" href="#support" id="id28">Support</a></li>
+<li><a class="reference internal" href="#please-react" id="id29">Please React!</a></li>
 </ul>
 </li>
 </ul>
@@ -97,7 +110,7 @@
 <div class="section" id="step-by-step-mini-user-s-guide">
 <h2><a class="toc-backref" href="#id15">Step-by-step Mini User's Guide</a></h2>
 <div class="section" id="objective">
-<h3>Objective</h3>
+<h3><a class="toc-backref" href="#id16">Objective</a></h3>
 <p>You have a directory tree (possibly only a directory, preferably a pre-sorted tree) of image files, such as:</p>
 <pre class="literal-block">
 MySnapshots
@@ -121,7 +134,7 @@ MySnapshots
 <p>You might have relevant, overall (general) gallery information to associate to this content; let's suppose that you wrote them down in a text file (ex: <tt class="docutils literal">MyInfos.txt</tt>). If your gallery is to be put online, you might have thought to a license and terms of use, that you would have written in another text file (ex: <tt class="docutils literal">MyLicence.txt</tt>).</p>
 </div>
 <div class="section" id="step-zero-optional-prepare-the-snapshots">
-<h3>Step zero (optional): prepare the snapshots</h3>
+<h3><a class="toc-backref" href="#id17">Step zero (optional): prepare the snapshots</a></h3>
 <p>One may take advantage of the <a class="reference external" href="https://hull.esperide.org/#for-snapshots-camera-pictures">relevant scripts in Ceylan-Hull</a> in order to better manage pictures, namely to fix their filenames as a whole (see <tt class="docutils literal"><span class="pre">rename-snapshots.sh</span></tt> for that) and to remove any associated metadata (typically EXIF information) before publishing (not to disclose timestamps, locations, etc.), thanks to <tt class="docutils literal"><span class="pre">remove-snapshot-metadata.sh</span></tt>.</p>
 <p id="orientation">One may then, once these metadata have been applied (images having been made upright) and cleared, correct the <strong>orientation</strong> (as some camera mess with them) of the remaining pictures that need it.</p>
 <p>For that, one may use <tt class="docutils literal">ImageMagick</tt> for that, precisely:</p>
@@ -131,7 +144,7 @@ $ mogrify -rotate &quot;-90&quot; foobar.jpeg
 </pre>
 </div>
 <div class="section" id="step-one-install-the-yag-osdl-tooling">
-<h3>Step one: install the YAG-OSDL tooling</h3>
+<h3><a class="toc-backref" href="#id18">Step one: install the YAG-OSDL tooling</a></h3>
 <div class="section" id="python">
 <h4>Python</h4>
 <p>First, retrieve and install prerequisites, first of which is <a class="reference external" href="http://python.org/download/">Python</a>, precisely <tt class="docutils literal">Python 3</tt> (we use <tt class="docutils literal">3.9.2</tt> at the time of this writing).</p>
@@ -167,7 +180,7 @@ $ python3 -m pip install -r requirements.txt
 </div>
 </div>
 <div class="section" id="step-two-edit-your-yag-osdl-configuration-file">
-<h3>Step two: edit your YAG-OSDL configuration file</h3>
+<h3><a class="toc-backref" href="#id19">Step two: edit your YAG-OSDL configuration file</a></h3>
 <p>Simplest solution is to derive it from the sample one:</p>
 <pre class="literal-block">
 $ cp yag-osdl.conf.sample yag-osdl-for-foobar.conf
@@ -203,14 +216,14 @@ author_mail = william.dalton&#64;maverick.org
 </pre>
 </div>
 <div class="section" id="step-three-annotate-the-images-thanks-to-our-helper-scripts">
-<h3>Step three: annotate the images, thanks to our helper scripts</h3>
+<h3><a class="toc-backref" href="#id20">Step three: annotate the images, thanks to our helper scripts</a></h3>
 <div class="section" id="to-trigger-the-annotation-process">
 <h4>To Trigger the Annotation Process</h4>
 <p>If we launch YAG-OSDL now, a full gallery will be generated, yet no comment nor theme information will be available.</p>
 <p>If one wants to provide them, just enter, for example, from the OSDL-Snake root:</p>
 <pre class="literal-block">
-$ MY_CONTENT_ROOT=&quot;/var/my-encrypted-storage/www/Moon-sources&quot;
-$ ./annotate-images.sh ${MY_CONTENT_ROOT}
+# Target your content root:
+$ ./annotate-images.sh /var/my-encrypted-storage/www/Moon-sources
 </pre>
 <p>We hereby suppose that two really common tools are available on your computer:</p>
 <ul class="simple">
@@ -221,7 +234,13 @@ $ ./annotate-images.sh ${MY_CONTENT_ROOT}
 <div class="section" id="commenting-galleries-images">
 <h4>Commenting Galleries &amp; Images</h4>
 <p>The <a class="reference external" href="https://github.com/Olivier-Boudeville/OSDL-Snake/blob/master/yag/annotate-images.sh">annotate-images.sh</a> script (which uses <a class="reference external" href="https://github.com/Olivier-Boudeville/OSDL-Snake/blob/master/yag/handle-image.sh">handle-image.sh</a>) will guide you and will trigger the appropriate tools.</p>
-<p>That is, it will first fire a text editor for each encountered <em>gallery</em> when scanning your content tree.</p>
+<p>That is, it will first fire a text editor for each encountered <em>gallery</em> when scanning your content tree, in order that, if wanted, you can comment any of them.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Each time a text will be requested from the YAG-OSDL user, the spawned editor will start with an explanatory placeholder that begins with the <tt class="docutils literal">#</tt> character.</p>
+<p>It can be safely replaced by actual information, knowing that YAG-OSDL will ignore all lines starting with <tt class="docutils literal">#</tt> afterwards.</p>
+<p class="last">In the specific case of comments, their text may include (well-formed) HTML mark-up.</p>
+</div>
 <p>On the example above, it would be first <tt class="docutils literal">MySnapshots</tt>, then <tt class="docutils literal">GoldWashing</tt>, and then <tt class="docutils literal">InsideVillage</tt>. In each of the corresponding files, feel free to give overall information relative to the content in that gallery directory.</p>
 <p>After this gallery-commenting phase, the next phase will be the <em>per-content</em> commenting. Indeed, for each image in the content tree, <tt class="docutils literal"><span class="pre">annotate-images.sh</span></tt> will launch the specified image viewer to display that picture (so that you are reminded of it), and then a first text editor is fired, where you may enter any <em>comments</em> <a class="footnote-reference" href="#id5" id="id4">[1]</a> you may have regarding that content.</p>
 <table class="docutils footnote" frame="void" id="id5" rules="none">
@@ -284,25 +303,25 @@ surf: Snapshots Of The Shark That Ate My Board
 </div>
 </div>
 <div class="section" id="step-four-launch-yag-osdl">
-<h3>Step four: launch YAG-OSDL</h3>
+<h3><a class="toc-backref" href="#id21">Step four: launch YAG-OSDL</a></h3>
 <p>Still following the example, one just have to run:</p>
 <pre class="literal-block">
 $ run-yag-osdl.sh --config yag-osdl-for-foobar.conf
 </pre>
 </div>
 <div class="section" id="step-five-admire-the-result">
-<h3>Step five: admire the result</h3>
+<h3><a class="toc-backref" href="#id22">Step five: admire the result</a></h3>
 <p>Use your browser to inspect your stunning new gallery, improve comments and themes if necessary and, if you feel like it should be put online, copy the whole content directory to a webserver, add a link to the gallery main page and tell all your friends about it!</p>
 </div>
 </div>
 <div class="section" id="troubleshooting">
-<h2><a class="toc-backref" href="#id16">Troubleshooting</a></h2>
+<h2><a class="toc-backref" href="#id23">Troubleshooting</a></h2>
 <div class="section" id="some-thumbnails-and-or-snapshots-are-not-properly-oriented">
-<h3>Some thumbnails and/or snapshots are not properly oriented</h3>
+<h3><a class="toc-backref" href="#id24">Some thumbnails and/or snapshots are not properly oriented</a></h3>
 <p>The corresponding original snapshots shall be rotated, refer to the <a class="reference internal" href="#orientation">orientation</a> section.</p>
 </div>
 <div class="section" id="unicodedecodeerror-when-running-yag-osdl">
-<h3>UnicodeDecodeError when running YAG-OSDL</h3>
+<h3><a class="toc-backref" href="#id25">UnicodeDecodeError when running YAG-OSDL</a></h3>
 <p>Precisely:</p>
 <pre class="literal-block">
 UnicodeDecodeError: 'utf-8' codec can't decode byte 0x## in position P
@@ -316,21 +335,21 @@ $ find . -name '*.txt' -exec switch-text-encoding.sh '{}' utf-8 ';'
 </div>
 </div>
 <div class="section" id="known-issues">
-<h2><a class="toc-backref" href="#id17">Known Issues</a></h2>
+<h2><a class="toc-backref" href="#id26">Known Issues</a></h2>
 <ul class="simple">
 <li>when switching between a content-based or a theme-based browsing (typically through the left menu), on Firefox a white transition flashes once; not a big issue</li>
 </ul>
 </div>
 <div class="section" id="licence">
-<span id="free-software"></span><h2><a class="toc-backref" href="#id18">Licence</a></h2>
+<span id="free-software"></span><h2><a class="toc-backref" href="#id27">Licence</a></h2>
 <p>The one of the original work applies, namely the <a class="reference external" href="http://www.gnu.org/licenses/gpl-3.0.html">GNU General Public License</a> (GPL), version 3.0 or later.</p>
 </div>
 <div class="section" id="support">
-<h2><a class="toc-backref" href="#id19">Support</a></h2>
+<h2><a class="toc-backref" href="#id28">Support</a></h2>
 <p>Bugs, questions, remarks, patches, requests for enhancements, etc. are to be reported (please specify it relates to YAG-OSDL) to the <a class="reference external" href="https://github.com/Olivier-Boudeville/OSDL-Snake">project interface</a> (typically <a class="reference external" href="https://github.com/Olivier-Boudeville/OSDL-Snake/issues">issues</a>) or directly at the email address mentioned at the beginning of this document.</p>
 </div>
 <div class="section" id="please-react">
-<h2><a class="toc-backref" href="#id20">Please React!</a></h2>
+<h2><a class="toc-backref" href="#id29">Please React!</a></h2>
 <p>If you have information more detailed or more recent than those presented in this document, if you noticed errors, neglects or points insufficiently discussed, drop us a line! (for that, follow the <a class="reference internal" href="#support">Support</a> guidelines).</p>
 <p>Have fun with YAG-OSDL!</p>
 <p><span class="raw-html"><a name="yagosdl_bottom"></a></span></p>
