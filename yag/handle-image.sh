@@ -65,19 +65,44 @@ comment_file="${image_directory}/${beginning_of_name}.txt"
 
 if [ ! -f "${comment_file}" ]; then
 
-	echo "# Replace this text with *comments* regarding content '${image_file}'." > "${comment_file}"
+	echo "# Replace this text with *comments* regarding the '$(basename ${image_file})' content (located in '${image_file}')." > "${comment_file}"
 
 fi
 
 ${EDITOR} "${comment_file}"
 
+# The YAG-OSDL Python code will ignore lines starting with '#' afterwards, yet
+# we prefer to avoid leaving text files that contain no information except the
+# placeholder above, so:
+#
+actual_content="$(grep -v '^ *#' "${comment_file}")"
 
+if [ -z "${actual_content}" ]; then
+
+	/bin/rm -f "${comment_file}"
+
+	# No else: we leave comments otherwise.
+
+fi
+
+
+# Do roughly the same for theme information:
 theme_file="${image_directory}/${beginning_of_name}.thm"
 
 if [ ! -f "${theme_file}" ]; then
 
-	echo "# Replace this text with *theme information* regarding content '${image_file}'." > "${theme_file}"
+	echo "# Replace this text with *theme information* regarding the '$(basename ${image_file})' content (located in '${image_file}')." > "${theme_file}"
 
 fi
 
 ${EDITOR} "${theme_file}"
+
+actual_content="$(grep -v '^ *#' "${theme_file}")"
+
+if [ -z "${actual_content}" ]; then
+
+	/bin/rm -f "${theme_file}"
+
+	# No else: we leave comments otherwise.
+
+fi
