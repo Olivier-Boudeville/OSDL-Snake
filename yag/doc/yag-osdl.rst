@@ -28,9 +28,9 @@ YAG-OSDL Homepage
 :Organisation: Copyright (C) 2004-2021 Olivier Boudeville
 :Contact: about (dash) yag-osdl (at) esperide (dot) com
 :Creation date: Sunday, August 17, 2008
-:Lastly updated: Wednesday, March 31, 2021
+:Lastly updated: Friday, April 2, 2021
 :Status: Stable
-:Version: 1.1.4
+:Version: 1.1.5
 :Dedication: Users of the ``YAG-OSDL`` tool.
 :Abstract:
 
@@ -55,7 +55,7 @@ YAG-OSDL Homepage
 
 
 .. contents:: Table of Contents
-  :depth: 2
+  :depth: 3
 
 
 
@@ -251,8 +251,8 @@ If we launch YAG-OSDL now, a full gallery will be generated, yet no comment nor 
 
 If one wants to provide them, just enter, for example, from the OSDL-Snake root::
 
-  $ MY_CONTENT_ROOT="/var/my-encrypted-storage/www/Moon-sources"
-  $ ./annotate-images.sh ${MY_CONTENT_ROOT}
+  # Target your content root:
+  $ ./annotate-images.sh /var/my-encrypted-storage/www/Moon-sources
 
 
 We hereby suppose that two really common tools are available on your computer:
@@ -267,9 +267,17 @@ Commenting Galleries & Images
 
 The `annotate-images.sh <https://github.com/Olivier-Boudeville/OSDL-Snake/blob/master/yag/annotate-images.sh>`_ script (which uses `handle-image.sh <https://github.com/Olivier-Boudeville/OSDL-Snake/blob/master/yag/handle-image.sh>`_) will guide you and will trigger the appropriate tools.
 
-That is, it will first fire a text editor for each encountered *gallery* when scanning your content tree.
+That is, it will first fire a text editor for each encountered *gallery* when scanning your content tree, in order that, if wanted, you can comment any of them.
+
+.. Note:: Each time a text will be requested from the YAG-OSDL user, the spawned editor will start with an explanatory placeholder that begins with the ``#`` character.
+
+		  It can be safely replaced by actual information, knowing that YAG-OSDL will ignore all lines starting with ``#`` afterwards.
+
+		  In the specific case of comments, their text may include (well-formed) HTML mark-up.
+
 
 On the example above, it would be first ``MySnapshots``, then ``GoldWashing``, and then ``InsideVillage``. In each of the corresponding files, feel free to give overall information relative to the content in that gallery directory.
+
 
 After this gallery-commenting phase, the next phase will be the *per-content* commenting. Indeed, for each image in the content tree, ``annotate-images.sh`` will launch the specified image viewer to display that picture (so that you are reminded of it), and then a first text editor is fired, where you may enter any *comments* [#]_ you may have regarding that content.
 
