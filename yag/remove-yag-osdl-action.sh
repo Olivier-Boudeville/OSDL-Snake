@@ -1,8 +1,17 @@
 #!/bin/sh
 
-usage="Usage: $(basename $0) [DIR_TO_CLEAN]: removes all yag-osdl generated files. If no argument is specified, operates from the current directory."
+usage="Usage: $(basename $0) [-h|--help] [DIR_TO_CLEAN]: removes all YAG-OSDL generated files. If no argument is specified, operates from the current directory.
+Typically used with the root directory specified in the 'output_directory' entry of the YAG-OSDL configuration file of interest."
 
 yag_created_dir="yag-osdl-resources"
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+
+	echo "${usage}"
+
+	exit 0
+
+fi
 
 
 if [ -z "$1" ]; then
