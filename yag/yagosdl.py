@@ -624,11 +624,7 @@ def preload_themes():
         output_device.info("Using standalone theme file '%s'." % (standalone_theme_path,))
         themes_with_eof = []
         with open(standalone_theme_path, 'r', encoding=yag_encoding) as f:
-            themes_with_eof = f.readlines()
-        decoded_themes = [th for th in themes_with_eof]
-        themes = []
-        for t in decoded_themes:
-            themes.append(t[:-1].strip())
+            themes = [l.strip() for l in f.readlines() if l[0] != '#' and l[0] != '\n']
         update_theme_tree(themes)
     else:
         output_device.debug("No standalone theme file ('%s') found." % (standalone_theme_path,))
@@ -682,13 +678,7 @@ def generate_full_page_for_graphic(prev_filename, graphic_filename, next_filenam
     if os.path.isfile(theme_path):
         #output_device.info("Using theme file '%s'." % (theme_path,))
         with open(theme_path, 'r', encoding=yag_encoding) as f:
-            themes_with_eof = [l.strip() for l in f.readlines() if l[0] != '#' and l[0] != '\n']
-
-        # No-op?
-        decoded_themes= [th for th in themes_with_eof]
-        themes = []
-        for t in decoded_themes:
-            themes.append(t[:-1].strip())
+            themes = [l.strip() for l in f.readlines() if l[0] != '#' and l[0] != '\n']
         update_theme_tree(themes)
 
         # In the theme file of this image, there may be sub-themes declared as
