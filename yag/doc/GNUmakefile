@@ -1,8 +1,9 @@
-
 .PHONY: doc all full-doc create-links html pdf clone-mirror          \
 		export-doc export-to-official export-to-mirror               \
-	   clean clean-doc clean-links info info-web
+		clean clean-doc-local clean-links-local info info-web
 
+
+PROJECT_VERSION := 1.1.7
 
 DOC_BASE_NAME := yag-osdl
 
@@ -84,25 +85,25 @@ export-doc: clean-doc full-doc export-to-official export-to-mirror
 #
 export-to-official: create-links $(DOC_GENERATED_FILES)
 	@echo "   Exporting YAG-OSDL documentation to official website ($(WEB_SRV))"
-	@/bin/scp $(SP) $(WEB_CONTENT) $(WEB_SRV):$(WEB_ROOT)/Snake
-
-# Symlinks would not be followed by US-Web apparently:
-#	@/bin/scp $(SP) $(WEB_CONTENT) $(WEB_SRV):$(WEB_ROOT)/Snake/OSDL-Snake/yag-osdl
+	@/bin/scp $(SP) -r $(WEB_CONTENT) $(WEB_SRV):$(WEB_ROOT)/Snake/
 
 
 export-to-mirror: create-links $(DOC_GENERATED_FILES)
 	@echo "   Exporting YAG-OSDL documentation to mirror website in $(OSDL_SNAKE_WEB_MIRROR_BRANCH)"
-	@/bin/cp -f $(WEB_CONTENT) $(OSDL_SNAKE_WEB_MIRROR_BRANCH) && cd $(OSDL_SNAKE_WEB_MIRROR_BRANCH) && git add . && git merge -s ours && git commit -m "YAG-OSDL doc updated." && git push && git pull --ff-only
+	@/bin/cp -rf $(WEB_CONTENT) $(OSDL_SNAKE_WEB_MIRROR_BRANCH) && cd $(OSDL_SNAKE_WEB_MIRROR_BRANCH) && git add . && git merge -s ours && git commit -m "YAG-OSDL doc updated." && git push && git pull --ff-only
 
 
-clean: clean-doc
+clean: clean-doc-local
 
-clean-doc: clean-links
+clean-doc: clean-doc-local clean-links
+
+
+clean-doc-local:
 	@echo "     Cleaning documentation"
 	-@/bin/rm -f *.aux *.log *.maf *.mtc* *.stc* *.tex *.toc $(DOC_GENERATED_FILES)
 
 
-clean-links:
+clean-links-local:
 	-@/bin/rm -f index.html
 
 
