@@ -15,14 +15,14 @@
 
 
 <span class="target" id="top"></span><p><span class="raw-html"><a name="yagosdl_top"></a></span></p>
-<p><span class="raw-html"><div class="banner"><p><em>YAG-OSDL documentation</em> <a href="http://snake.esperide.org/yag-osdl.html">browse latest</a> <a href="https://olivier-boudeville.github.io/OSDL-Snake/index.html">browse mirror</a> <a href="yag-osdl.pdf">get PDF</a> <a href="#yagosdl_top">go to top</a> <a href="#yagosdl_bottom">go to bottom</a> <a href="https://github.com/Olivier-Boudeville/OSDL-Snake">go to project</a> <a href="mailto:about(dash)yag-osdl(at)esperide(dot)com?subject=[OSDL-Snake]%20YAG-OSDL%20Remark">email us</a></div></span></p>
+<p><span class="raw-html"><div class="banner"><p><em>YAG-OSDL documentation</em> <a href="http://snake.esperide.org/yag-osdl.html">browse latest</a> <a href="https://olivier-boudeville.github.io/OSDL-Snake/index.html">browse mirror</a> <a href="yag-osdl.pdf">get PDF</a> <a href="#yagosdl_top">go to top</a>  <a href="#yagosdl_toc">go to toc</a> <a href="#yagosdl_bottom">go to bottom</a> <a href="https://github.com/Olivier-Boudeville/OSDL-Snake">go to project</a> <a href="mailto:about(dash)yag-osdl(at)esperide(dot)com?subject=[OSDL-Snake]%20YAG-OSDL%20Remark">email us</a></div></span></p>
 <div class="section" id="yag-osdl-homepage">
 <h1><a class="toc-backref" href="#id12">YAG-OSDL Homepage</a></h1>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Organisation:</th><td class="field-body"><p class="first">Copyright (C) 2004-2021 Olivier Boudeville</p>
+<tr class="field"><th class="field-name">Organisation:</th><td class="field-body"><p class="first">Copyright (C) 2004-2022 Olivier Boudeville</p>
 </td>
 </tr>
 <tr class="field"><th class="field-name">Contact:</th><td class="field-body"><p class="first">about (dash) yag-osdl (at) esperide (dot) com</p>
@@ -31,19 +31,19 @@
 <tr class="field"><th class="field-name">Creation date:</th><td class="field-body"><p class="first">Sunday, August 17, 2008</p>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Lastly updated:</th><td class="field-body"><p class="first">Saturday, April 3, 2021</p>
+<tr class="field"><th class="field-name">Lastly updated:</th><td class="field-body"><p class="first">Monday, February 21, 2022</p>
 </td>
 </tr>
 <tr class="field"><th class="field-name">Status:</th><td class="field-body"><p class="first">Stable</p>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Version:</th><td class="field-body"><p class="first">1.1.6</p>
+<tr class="field"><th class="field-name">Version:</th><td class="field-body"><p class="first">1.1.7</p>
 </td>
 </tr>
 <tr class="field"><th class="field-name">Dedication:</th><td class="field-body"><p class="first">Users of the <tt class="docutils literal"><span class="pre">YAG-OSDL</span></tt> tool.</p>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Abstract:</th><td class="field-body"><p class="first">The role of <a class="reference external" href="http://snake.esperide.org/yag-osdl.html/">YAG-OSDL</a> is to generate static HTML galleries out of a filesystem tree containing snapshots (camera pictures). See <a class="reference external" href="https://osdl-data.esperide.org">this website</a> for an example of YAG-OSDL in action.</p>
+<tr class="field"><th class="field-name">Abstract:</th><td class="field-body"><p class="first">The role of <a class="reference external" href="http://snake.esperide.org/yag-osdl.html">YAG-OSDL</a> is to generate static HTML galleries out of a filesystem tree containing snapshots (camera pictures). See <a class="reference external" href="https://osdl-data.esperide.org">this website</a> for an example of YAG-OSDL in action.</p>
 <p>Browsing this content can be done according to the tree structure (per gallery, through which one can navigate and that can be nested, each with subgalleries containing thumbnails) or based on themes that themselves form a separate hierarchy (any theme may be further split into subthemes recursively).</p>
 <p>Besides themes, a comment may be attached to a snapshot, and will be displayed accordingly.</p>
 <p class="last">The next level of information is to read the corresponding <a class="reference external" href="https://github.com/Olivier-Boudeville/OSDL-Snake/yag">source files</a>, which are intensely commented and generally straightforward.</p>
@@ -52,8 +52,9 @@
 </tbody>
 </table>
 <p></p>
+<p><span class="raw-html"><a name="yagosdl_toc"></a></span></p>
 <div class="contents topic" id="id1">
-<span id="table-of-contents"></span><p class="topic-title">Table of Contents</p>
+<span id="table-of-contents"></span><p class="topic-title"><strong>Table of Contents</strong></p>
 <ul class="simple">
 <li><a class="reference internal" href="#yag-osdl-homepage" id="id12">YAG-OSDL Homepage</a><ul>
 <li><a class="reference internal" href="#overview" id="id13">Overview</a></li>
@@ -140,9 +141,9 @@ MySnapshots
 <p>One may take advantage of the <a class="reference external" href="https://hull.esperide.org/#for-snapshots-camera-pictures">relevant scripts in Ceylan-Hull</a> in order to better manage pictures, namely to fix their filenames as a whole (see <tt class="docutils literal"><span class="pre">rename-snapshots.sh</span></tt> for that) and to remove any associated metadata (typically EXIF information) before publishing (not to disclose timestamps, locations, etc.), thanks to <tt class="docutils literal"><span class="pre">remove-snapshot-metadata.sh</span></tt>.</p>
 <p id="orientation">One may then, once these metadata have been applied (images having been made upright) and cleared, correct the <strong>orientation</strong> (as some camera mess with them) of the remaining pictures that need it.</p>
 <p>For that, one may use <tt class="docutils literal">ImageMagick</tt> for that, precisely:</p>
-<pre class="literal-block">
-# Counter-clockwise, in-place rotation:
-$ mogrify -rotate &quot;-90&quot; foobar.jpeg
+<pre class="code bash literal-block">
+<span class="c1"># Counter-clockwise, in-place rotation:
+</span>$ mogrify -rotate <span class="s2">&quot;-90&quot;</span> foobar.jpeg
 </pre>
 </div>
 <div class="section" id="step-one-install-the-yag-osdl-tooling">
@@ -157,8 +158,8 @@ $ mogrify -rotate &quot;-90&quot; foobar.jpeg
 <h4>Ceylan-Snake</h4>
 <p><tt class="docutils literal"><span class="pre">YAG-OSDL</span></tt> belongs to <tt class="docutils literal"><span class="pre">OSDL-Snake</span></tt>, which relies on <tt class="docutils literal"><span class="pre">Ceylan-Snake</span></tt>.</p>
 <p>This is just a matter of:</p>
-<pre class="literal-block">
-$ cd ~/my-projects
+<pre class="code bash literal-block">
+$ <span class="nb">cd</span> ~/my-projects
 $ git clone https://github.com/Olivier-Boudeville/Ceylan-Snake
 </pre>
 <p>Set in your environment a <tt class="docutils literal">CEYLAN_SNAKE</tt> variable pointing to that clone; ex:</p>
@@ -169,13 +170,13 @@ $ export CEYLAN_SNAKE=&quot;${HOME}/my-projects/Ceylan-Snake&quot;
 <div class="section" id="yag-osdl-itself">
 <h4>YAG-OSDL itself</h4>
 <p>Then obtain the YAG-OSDL codebase thanks to, for example:</p>
-<pre class="literal-block">
-$ cd ~/my-projects
+<pre class="code bash literal-block">
+$ <span class="nb">cd</span> ~/my-projects
 $ git clone https://github.com/Olivier-Boudeville/OSDL-Snake
-$ cd OSDL-Snake
+$ <span class="nb">cd</span> OSDL-Snake
 </pre>
 <p>Then the needed Python3 packages, which are listed in <a class="reference external" href="https://github.com/Olivier-Boudeville/OSDL-Snake/yag/requirements.txt">requirements.txt</a>, can be installed with:</p>
-<pre class="literal-block">
+<pre class="code bash literal-block">
 $ python3 -m pip install -r requirements.txt
 </pre>
 <p>This only involves installing actually <tt class="docutils literal">Pillow</tt> (which supersedes <tt class="docutils literal">PIL</tt>).</p>
@@ -184,37 +185,37 @@ $ python3 -m pip install -r requirements.txt
 <div class="section" id="step-two-edit-your-yag-osdl-configuration-file">
 <h3><a class="toc-backref" href="#id21">Step two: edit your YAG-OSDL configuration file</a></h3>
 <p>Simplest solution is to derive it from the sample one:</p>
-<pre class="literal-block">
+<pre class="code bash literal-block">
 $ cp yag-osdl.conf.sample yag-osdl-for-foobar.conf
 </pre>
 <p>We hope that <a class="reference external" href="https://github.com/Olivier-Boudeville/OSDL-Snake/blob/master/yag/yag-osdl.conf.sample">this sample</a> is self-describing enough for most uses; yours could be edited that way:</p>
-<pre class="literal-block">
-[Options]
+<pre class="code ini literal-block">
+<span class="k">[Options]</span><span class="w">
 
-# Now can be mostly any string:
-project_name = Moon Photos
+</span><span class="c1"># Now can be mostly any string:</span><span class="w">
+</span><span class="na">project_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Moon Photos</span><span class="w">
 
-# One may prefer absolute paths for simpler management.
+</span><span class="c1"># One may prefer absolute paths for simpler management.</span><span class="w">
 
-content_directory = /var/my-encrypted-storage/www/Moon-sources
-#resource_directory = /home/dalton/Projects/Tools/yag/yag-osdl-latest/resources
+</span><span class="na">content_directory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">/var/my-encrypted-storage/www/Moon-sources</span><span class="w">
+</span><span class="c1">#resource_directory = /home/dalton/Projects/Tools/yag/yag-osdl-latest/resources</span><span class="w">
 
-output_in_content = False
-output_directory = /var/my-encrypted-storage/www/Moon
+</span><span class="na">output_in_content</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span><span class="w">
+</span><span class="na">output_directory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">/var/my-encrypted-storage/www/Moon</span><span class="w">
 
-#language = English
-language = French
+</span><span class="c1">#language = English</span><span class="w">
+</span><span class="na">language</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">French</span><span class="w">
 
-#theme = OSDL-english-theme
-theme = OSDL-french-theme
+</span><span class="c1">#theme = OSDL-english-theme</span><span class="w">
+</span><span class="na">theme</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">OSDL-french-theme</span><span class="w">
 
-thumbsize = 120
-images_by_row = 4
-images_by_column = 4
-dash_is_space_in_menu = True
+</span><span class="na">thumbsize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">120</span><span class="w">
+</span><span class="na">images_by_row</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">4</span><span class="w">
+</span><span class="na">images_by_column</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">4</span><span class="w">
+</span><span class="na">dash_is_space_in_menu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">True</span><span class="w">
 
-author = William Dalton
-author_mail = william.dalton&#64;maverick.org
+</span><span class="na">author</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">William Dalton</span><span class="w">
+</span><span class="na">author_mail</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">william.dalton&#64;maverick.org</span>
 </pre>
 </div>
 <div class="section" id="step-three-annotate-the-images-thanks-to-our-helper-scripts">
@@ -223,9 +224,9 @@ author_mail = william.dalton&#64;maverick.org
 <h4>To Trigger the Annotation Process</h4>
 <p>If we launch YAG-OSDL now, a full gallery will be generated, yet no comment nor theme information will be available.</p>
 <p>If one wants to provide them, just enter, for example, from the OSDL-Snake root:</p>
-<pre class="literal-block">
-# Target your content root:
-$ ./annotate-images.sh /var/my-encrypted-storage/www/Moon-sources
+<pre class="code bash literal-block">
+<span class="c1"># Target your content root:
+</span>$ ./annotate-images.sh /var/my-encrypted-storage/www/Moon-sources
 </pre>
 <p>We hereby suppose that two really common tools are available on your computer:</p>
 <ul class="simple">
@@ -307,7 +308,7 @@ surf: Snapshots Of The Shark That Ate My Board
 <div class="section" id="step-four-launch-yag-osdl">
 <h3><a class="toc-backref" href="#id23">Step four: launch YAG-OSDL</a></h3>
 <p>Still following the example, one just have to run:</p>
-<pre class="literal-block">
+<pre class="code bash literal-block">
 $ run-yag-osdl.sh --config yag-osdl-for-foobar.conf
 </pre>
 </div>
@@ -331,8 +332,8 @@ UnicodeDecodeError: 'utf-8' codec can't decode byte 0x## in position P
 <p>This error happens as the various text files involved (ex: to describe themes, to comment snapshots, etc.) shall contain UTF-8 Unicode text, otherwise pure ASCII text (ex: not ISO-8859 text).</p>
 <p>If needed, one may thus have to convert them, possibly thanks to our <a class="reference external" href="https://github.com/Olivier-Boudeville/Ceylan-Hull/blob/master/switch-text-encoding.sh">switch-text-encoding.sh</a> script, before running again YAG-OSDL.</p>
 <p>For example:</p>
-<pre class="literal-block">
-$ find . -name '*.txt' -exec switch-text-encoding.sh '{}' utf-8 ';'
+<pre class="code bash literal-block">
+$ find . -name <span class="s1">'*.txt'</span> -exec switch-text-encoding.sh <span class="s1">'{}'</span> utf-8 <span class="s1">';'</span>
 </pre>
 </div>
 <div class="section" id="dead-links-were-spotted">
@@ -341,7 +342,7 @@ $ find . -name '*.txt' -exec switch-text-encoding.sh '{}' utf-8 ';'
 <table class="docutils footnote" frame="void" id="id11" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id10">[4]</a></td><td>Note that at least some of them (ex: this <a class="reference external" href="https://www.deadlinkchecker.com">one</a>) seem to possibly report erroneous false positives when applied to websites generated by YAG-OSDL (404 errors reported, whereas corresponding content <em>is</em> available and other checkers agree).</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id10">[4]</a></td><td>Note that at least some of them (ex: this <a class="reference external" href="https://www.deadlinkchecker.com">one</a>) seem to possibly report erroneous false positives when applied to websites generated by YAG-OSDL (404 errors reported, whereas corresponding content <em>is</em> available,and other checkers agree). So we tend to prefer for example this <a class="reference external" href="https://www.brokenlinkcheck.com">service</a>.</td></tr>
 </tbody>
 </table>
 <p>Please <a class="reference internal" href="#report">report</a> any confirmed issue with a diagnosis as precise as possible.</p>
