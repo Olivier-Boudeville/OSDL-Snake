@@ -3,7 +3,7 @@
 		clean clean-doc-local clean-links-local info info-web
 
 
-PROJECT_VERSION := 1.1.7
+PROJECT_VERSION := 1.1.8
 
 DOC_BASE_NAME := yag-osdl
 
@@ -36,11 +36,12 @@ GITHUB_PAGES_BASE := $(shell basename "$(OSDL_SNAKE_WEB_MIRROR_BRANCH)")
 
 
 # Default do-nothing target:
-doc:
-
-
 all:
-	@echo "  Run 'make full-doc' to generate the manual of YAG-OSDL."
+	@echo "  Run 'make doc' to generate the YAG-OSDL documentation."
+
+
+doc: html pdf
+
 
 
 full-doc: $(DOC_GENERATED_FILES)
@@ -88,9 +89,10 @@ export-to-official: create-links $(DOC_GENERATED_FILES)
 	@/bin/scp $(SP) -r $(WEB_CONTENT) $(WEB_SRV):$(WEB_ROOT)/Snake/
 
 
-export-to-mirror: create-links $(DOC_GENERATED_FILES)
+# H option for cp so that a local MathJax is copied in target branch:
+export-to-mirror: create-links clean-doc create-links doc
 	@echo "   Exporting YAG-OSDL documentation to mirror website in $(OSDL_SNAKE_WEB_MIRROR_BRANCH)"
-	@/bin/cp -rf $(WEB_CONTENT) $(OSDL_SNAKE_WEB_MIRROR_BRANCH) && cd $(OSDL_SNAKE_WEB_MIRROR_BRANCH) && git add . && git merge -s ours && git commit -m "YAG-OSDL doc updated." && git push && git pull --ff-only
+	@/bin/cp -rfH $(WEB_CONTENT) $(OSDL_SNAKE_WEB_MIRROR_BRANCH) && cd $(OSDL_SNAKE_WEB_MIRROR_BRANCH) && git add . && git merge -s ours && git commit -m "YAG-OSDL doc updated." && git push && git pull --ff-only
 
 
 clean: clean-doc-local
